@@ -1,0 +1,39 @@
+# ===== 环境配置（含密钥，严禁上传）=====
+.env
+.env.*
+!.env.example
+
+# ===== Python 缓存 =====
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ===== 虚拟环境 =====
+venv/
+.venv/
+env/
+ENV/
+
+# ===== 数据与日志 =====
+data/
+*.log
+
+# ===== 模型文件（体积巨大，GitHub 无法承载）=====
+models/
+*.safetensors
+*.bin
+*.gguf
+*.onnx
+*.pth
+*.pt
+
+# ===== IDE / 系统文件 =====
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ===== 其他临时文件 =====
+*.pkl
+*.tmp
