@@ -3,59 +3,203 @@ import {
   createWebHistory
 } from "vue-router"
 
+
 const routes = [
-  // 登录页面
+
+  // =========================
+  // 登录
+  // =========================
+
   {
     path: "/login",
-    component: () => import("../views/Login/Login.vue")
+
+    name: "Login",
+
+    component: () =>
+      import("../views/Login/Login.vue"),
+
+    meta: {
+      requiresAuth: false
+    }
+
   },
 
-  // 默认进入登录页
+
+  // =========================
+  // 主系统
+  // =========================
+
   {
     path: "/",
-    redirect: "/login"
-  },
 
-  // 主系统
-  {
-    path: "/app",
-    component: () => import("../layouts/MainLayout.vue"),
+    component: () =>
+      import("../layouts/MainLayout.vue"),
+
+    meta: {
+      requiresAuth: true
+    },
+
     children: [
+
+      // 首页
       {
         path: "",
-        redirect: "/app/workspace"
+
+        redirect: "/workspace"
+
       },
+
+
+      // 首页工作台
       {
         path: "workspace",
-        component: () => import("../views/Workspace/Home.vue")
+
+        name: "Workspace",
+
+        component: () =>
+          import("../views/Workspace/Home.vue"),
+
+        meta: {
+          requiresAuth: true
+        }
+
       },
+
+
+      // 知识地图
       {
         path: "knowledge",
-        component: () => import("../views/Knowledge/KnowledgeMap.vue")
+
+        name: "Knowledge",
+
+        component: () =>
+          import("../views/Knowledge/KnowledgeMap.vue"),
+
+        meta: {
+          requiresAuth: true
+        }
+
       },
+
+
+      // 状态仪表盘
       {
         path: "dashboard",
-        component: () => import("../views/Dashboard/Dashboard.vue")
+
+        name: "Dashboard",
+
+        component: () =>
+          import("../views/Dashboard/Dashboard.vue"),
+
+        meta: {
+          requiresAuth: true
+        }
+
       },
+
+
+      // 成长轨迹
       {
         path: "growth",
-        component: () => import("../views/Growth/GrowthTimeline.vue")
+
+        name: "Growth",
+
+        component: () =>
+          import("../views/Growth/GrowthTimeline.vue"),
+
+        meta: {
+          requiresAuth: true
+        }
+
       },
+
+
+      // 导航建议
       {
         path: "navigation",
-        component: () => import("../views/Navigation/Navigation.vue")
+
+        name: "Navigation",
+
+        component: () =>
+          import("../views/Navigation/Navigation.vue"),
+
+        meta: {
+          requiresAuth: true
+        }
+
       },
+
+
+      // 成长报告
       {
         path: "report",
-        component: () => import("../views/Report/GrowthReport.vue")
+
+        name: "Report",
+
+        component: () =>
+          import("../views/Report/GrowthReport.vue"),
+
+        meta: {
+          requiresAuth: true
+        }
+
       }
+
     ]
+
   }
+
 ]
 
+
 const router = createRouter({
+
   history: createWebHistory(),
+
   routes
+
 })
+
+
+// =========================
+// 路由守卫
+// =========================
+
+router.beforeEach((to, from, next) => {
+
+  const token =
+    localStorage.getItem("token")
+
+
+  // 需要登录，但是没有 Token
+  if (
+    to.meta.requiresAuth &&
+    !token
+  ) {
+
+    next("/login")
+
+    return
+
+  }
+
+
+  // 已经登录，还访问登录页
+  if (
+    to.path === "/login" &&
+    token
+  ) {
+
+    next("/workspace")
+
+    return
+
+  }
+
+
+  next()
+
+})
+
 
 export default router

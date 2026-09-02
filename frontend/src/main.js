@@ -1,40 +1,39 @@
-import {
-createApp
-}
-from 'vue'
+import { createApp } from "vue"
+
+import { createPinia } from "pinia"
+
+import ElementPlus from "element-plus"
+
+import "element-plus/dist/index.css"
+
+import App from "./App.vue"
+
+import router from "./router"
 
 
-import App from './App.vue'
+const app = createApp(App)
 
 
-import router from './router'
+// Pinia
+const pinia = createPinia()
+
+app.use(pinia)
 
 
-import {
-createPinia
-}
-from 'pinia'
-
-
-import ElementPlus
-from 'element-plus'
-
-
-import 'element-plus/dist/index.css'
-
-
-import './style.css'
-
-
-
-const app=createApp(App)
-
-
-app.use(router)
-
-app.use(createPinia())
-
+// Element Plus
 app.use(ElementPlus)
 
 
-app.mount('#app')
+// Vue Router
+app.use(router)
+
+
+// 恢复登录状态
+import { useUserStore } from "./stores/user"
+
+const userStore = useUserStore()
+
+userStore.restoreLogin()
+
+
+app.mount("#app")
