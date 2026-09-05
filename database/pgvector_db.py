@@ -24,6 +24,7 @@ PGVector 0.8.6
 knowledge_chunks
 """
 
+import logging
 import os
 
 import numpy as np
@@ -31,6 +32,9 @@ import psycopg2
 
 from dotenv import load_dotenv
 from pgvector.psycopg2 import register_vector
+
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================
@@ -94,7 +98,9 @@ class PGVectorManager:
             ),
 
             "database": database or os.getenv(
-                "PGVECTOR_DATABASE",
+                "PGVECTOR_DATABASE"
+            ) or os.getenv(
+                "PGVECTOR_DB",
                 "programmind"
             ),
 
@@ -163,20 +169,35 @@ class PGVectorManager:
 
     def _check_connection(self):
         """
-        检查数据库连接是否有效。
+        检查数据库连接是否有效，失效时自动重连一次。
+
+        连接缺失 / 已关闭 / 探活失败 三种情况都会触发重连；
+        重连失败会抛出 ConnectionError。
         """
 
-        if self.conn is None:
+        if self.conn is not None and not self.conn.closed:
 
-            raise RuntimeError(
-                "数据库尚未连接，请先调用 connect()"
-            )
+            try:
 
-        if self.conn.closed:
+                cursor = self.conn.cursor()
 
-            raise RuntimeError(
-                "数据库连接已经关闭"
-            )
+                try:
+                    cursor.execute("SELECT 1")
+                finally:
+                    cursor.close()
+
+                return
+
+            except Exception:
+
+                logger.warning(
+                    "PGVector 连接失效，尝试重连",
+                    exc_info=True
+                )
+
+        self.conn = None
+
+        self.connect()
 
     # ========================================================
     # 创建知识表
@@ -615,6 +636,12 @@ class PGVectorManager:
             raise ValueError(
                 "top_k 必须大于 0"
             )
+
+        # ----------------------------------------------------
+        # 确保连接有效（失效自动重连）
+        # ----------------------------------------------------
+
+        self._check_connection()
 
         sql = """
         SELECT

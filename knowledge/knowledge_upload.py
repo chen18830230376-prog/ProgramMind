@@ -16,8 +16,13 @@ PGVector
 knowledge_chunks
 """
 
+import logging
+
 from core.embedding_model import EmbeddingModel
 from database.pgvector_db import PGVectorManager
+
+
+logger = logging.getLogger(__name__)
 
 
 class KnowledgeUploader:
@@ -70,57 +75,64 @@ class KnowledgeUploader:
                 "count": 0
             }
 
-        uploaded_count = 0
+        try:
 
-        for doc in documents:
+            uploaded_count = 0
 
-            content = doc.get(
-                "content"
-            )
+            for doc in documents:
 
-            if not content:
-
-                continue
-
-            source = doc.get(
-                "source"
-            )
-
-            chunk_id = doc.get(
-                "chunk_id",
-                0
-            )
-
-            # ------------------------------------------------
-            # 生成 Embedding
-            # ------------------------------------------------
-
-            print(
-                f"正在向量化第 {chunk_id} 个知识片段..."
-            )
-
-            vector = (
-                self.embedding.encode_single(
-                    content
+                content = doc.get(
+                    "content"
                 )
-            )
 
-            # ------------------------------------------------
-            # 写入 PGVector
-            # ------------------------------------------------
+                if not content:
 
-            row_id = self.vector_db.insert(
-                content=content,
-                embedding=vector,
-                source=source,
-                chunk_id=chunk_id
-            )
+                    continue
 
-            print(
-                f"知识片段已写入，ID：{row_id}"
-            )
+                source = doc.get(
+                    "source"
+                )
 
-            uploaded_count += 1
+                chunk_id = doc.get(
+                    "chunk_id",
+                    0
+                )
+
+                # ------------------------------------------------
+                # 生成 Embedding
+                # ------------------------------------------------
+
+                print(
+                    f"正在向量化第 {chunk_id} 个知识片段..."
+                )
+
+                vector = (
+                    self.embedding.encode_single(
+                        content
+                    )
+                )
+
+                # ------------------------------------------------
+                # 写入 PGVector
+                # ------------------------------------------------
+
+                row_id = self.vector_db.insert(
+                    content=content,
+                    embedding=vector,
+                    source=source,
+                    chunk_id=chunk_id
+                )
+
+                print(
+                    f"知识片段已写入，ID：{row_id}"
+                )
+
+                uploaded_count += 1
+
+        except Exception as e:
+
+            logger.exception("知识上传失败")
+            raise RuntimeError(f"知识上传失败: {e}") from e
 
         return {
             "status": "success",

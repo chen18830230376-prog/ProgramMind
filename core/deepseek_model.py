@@ -11,10 +11,14 @@ DeepSeek 模型
 4. 环境变量配置
 """
 
+import logging
 import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
+
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================
@@ -73,7 +77,9 @@ class DeepSeekModel:
 
         self.client = OpenAI(
             api_key=DEEPSEEK_API_KEY,
-            base_url="https://api.deepseek.com"
+            base_url="https://api.deepseek.com",
+            timeout=60.0,
+            max_retries=2
         )
 
         # ----------------------------------------------------
@@ -130,32 +136,40 @@ class DeepSeekModel:
         # 调用 DeepSeek
         # ----------------------------------------------------
 
-        response = self.client.chat.completions.create(
+        try:
+            response = self.client.chat.completions.create(
 
-            model=self.model_name,
+                model=self.model_name,
 
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
 
-            temperature=temperature,
+                temperature=temperature,
 
-            max_tokens=max_tokens
-        )
+                max_tokens=max_tokens
+            )
+        except Exception as e:
+            logger.exception("DeepSeek API 调用失败")
+            raise RuntimeError(f"DeepSeek 调用失败: {e}") from e
 
         # ----------------------------------------------------
         # 获取回答
         # ----------------------------------------------------
 
-        answer = (
-            response
-            .choices[0]
-            .message
-            .content
-        )
+        try:
+            answer = (
+                response
+                .choices[0]
+                .message
+                .content
+            )
+        except (IndexError, AttributeError) as e:
+            logger.error("DeepSeek 返回格式异常: %s", response)
+            raise RuntimeError("DeepSeek 返回格式异常") from e
 
         if answer is None:
 
@@ -200,46 +214,54 @@ class DeepSeekModel:
         # 创建流式请求
         # ----------------------------------------------------
 
-        response = self.client.chat.completions.create(
+        try:
+            response = self.client.chat.completions.create(
 
-            model=self.model_name,
+                model=self.model_name,
 
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
 
-            temperature=temperature,
+                temperature=temperature,
 
-            max_tokens=max_tokens,
+                max_tokens=max_tokens,
 
-            stream=True
-        )
+                stream=True
+            )
+        except Exception as e:
+            logger.exception("DeepSeek 流式调用失败")
+            raise RuntimeError(f"DeepSeek 流式调用失败: {e}") from e
 
         # ----------------------------------------------------
         # 逐块读取 DeepSeek 返回内容
         # ----------------------------------------------------
 
-        for chunk in response:
+        try:
+            for chunk in response:
 
-            # 有些 chunk 可能没有 choices
-            if not chunk.choices:
+                # 有些 chunk 可能没有 choices
+                if not chunk.choices:
 
-                continue
+                    continue
 
-            delta = chunk.choices[0].delta
+                delta = chunk.choices[0].delta
 
-            if delta is None:
+                if delta is None:
 
-                continue
+                    continue
 
-            content = delta.content
+                content = delta.content
 
-            if content:
+                if content:
 
-                yield content
+                    yield content
+        except Exception as e:
+            logger.exception("DeepSeek 流式读取失败")
+            raise RuntimeError(f"DeepSeek 流式读取失败: {e}") from e
 
 
 # ============================================================

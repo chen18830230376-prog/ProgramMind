@@ -26,8 +26,14 @@ AI 统一接口服务
 """
 
 
-from fastapi import FastAPI
+import logging
+
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================
@@ -57,6 +63,20 @@ app = FastAPI(
 
 
 # ============================================================
+# 请求日志中间件
+# ============================================================
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """记录每个请求的方法、路径与响应状态码。"""
+    logger.info("请求 %s %s", request.method, request.url.path)
+    response = await call_next(request)
+    logger.info("响应 %s %s -> %s",
+                request.method, request.url.path, response.status_code)
+    return response
+
+
+# ============================================================
 # 全局服务对象
 #
 # 使用懒加载：
@@ -78,14 +98,36 @@ rag = None
 # ------------------------------------------------------------
 # Agent / KCI / 学习规划模块
 #
-# 这些模块目前初始化成本相对较低。
+# 同样采用懒加载：首次请求时才实例化，
+# 避免其中任一模块初始化失败导致整个服务无法启动。
 # ------------------------------------------------------------
 
-workflow = ProgramMindWorkflow()
+workflow = None
 
-kci_model = KCIModel()
+kci_model = None
 
-planner = DynamicPlanner()
+planner = None
+
+
+def _get_workflow():
+    global workflow
+    if workflow is None:
+        workflow = ProgramMindWorkflow()
+    return workflow
+
+
+def _get_kci_model():
+    global kci_model
+    if kci_model is None:
+        kci_model = KCIModel()
+    return kci_model
+
+
+def _get_planner():
+    global planner
+    if planner is None:
+        planner = DynamicPlanner()
+    return planner
 
 
 # ============================================================
@@ -100,11 +142,21 @@ class ChatRequest(BaseModel):
     示例：
 
     {
-        "question": "什么是人工智能？"
+        "question": "什么是人工智能？",
+        "task": "教学"
     }
+
+    task（可选）指定场景，经 ModelRouter 路由到对应模型：
+
+        教学 / 答疑 / 知识库 / 学习规划 / 备课 / RAG  → Qwen
+        代码 / 算法 / 论文 / 科研                    → DeepSeek
+
+    不传时默认为 "教学"。
     """
 
     question: str
+
+    task: str = "教学"
 
 
 class RAGRequest(BaseModel):
@@ -217,33 +269,44 @@ def chat(req: ChatRequest):
 
     if not req.question or not req.question.strip():
 
-        return {
-            "question": req.question,
-            "answer": "问题不能为空。"
-        }
+        return JSONResponse(
+            status_code=400,
+            content={"error": "问题不能为空。"}
+        )
 
     question = req.question.strip()
 
-    # --------------------------------------------------------
-    # 第一次调用时初始化统一模型系统
-    # --------------------------------------------------------
+    task = (req.task or "教学").strip()
 
-    if llm is None:
+    try:
 
-        llm = LLMModel()
+        # ----------------------------------------------------
+        # 第一次调用时初始化统一模型系统
+        # ----------------------------------------------------
 
-    # --------------------------------------------------------
-    # 教学任务
-    #
-    # ModelRouter：
-    #
-    # 教学 → Qwen
-    # --------------------------------------------------------
+        if llm is None:
 
-    answer = llm.generate(
-        question,
-        task="教学"
-    )
+            llm = LLMModel()
+
+        # ----------------------------------------------------
+        # 按请求场景路由模型：
+        #
+        # 教学 / 答疑 / 知识库 / 学习规划 / 备课 / RAG → Qwen
+        # 代码 / 算法 / 论文 / 科研                    → DeepSeek
+        # ----------------------------------------------------
+
+        answer = llm.generate(
+            question,
+            task=task
+        )
+
+    except Exception:
+
+        logger.exception("普通问答接口处理失败")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "AI 服务暂时不可用，请稍后重试"}
+        )
 
     # --------------------------------------------------------
     # 返回
@@ -251,6 +314,7 @@ def chat(req: ChatRequest):
 
     return {
         "question": question,
+        "task": task,
         "answer": answer
     }
 
@@ -315,44 +379,53 @@ def rag_chat(req: RAGRequest):
 
     if not req.question or not req.question.strip():
 
-        return {
-            "question": req.question,
-            "answer": "问题不能为空。",
-            "sources": []
-        }
+        return JSONResponse(
+            status_code=400,
+            content={"error": "问题不能为空。"}
+        )
 
     question = req.question.strip()
 
-    # --------------------------------------------------------
-    # 第一次调用 RAG 时初始化
-    #
-    # 初始化过程中：
-    #
-    # bge-m3
-    # PGVector
-    # LLMModel
-    #
-    # Qwen 本身依然采用懒加载，
-    # 真正执行 rag.run() 时才加载。
-    # --------------------------------------------------------
+    try:
 
-    if rag is None:
+        # --------------------------------------------------------
+        # 第一次调用 RAG 时初始化
+        #
+        # 初始化过程中：
+        #
+        # bge-m3
+        # PGVector
+        # LLMModel
+        #
+        # Qwen 本身依然采用懒加载，
+        # 真正执行 rag.run() 时才加载。
+        # --------------------------------------------------------
 
-        rag = RAGPipeline(
-            load_llm=True
+        if rag is None:
+
+            rag = RAGPipeline(
+                load_llm=True
+            )
+
+        # --------------------------------------------------------
+        # 动态执行 RAG
+        #
+        # 注意：
+        # question 来自前端请求，
+        # 不是固定问题。
+        # --------------------------------------------------------
+
+        result = rag.run(
+            question
         )
 
-    # --------------------------------------------------------
-    # 动态执行 RAG
-    #
-    # 注意：
-    # question 来自前端请求，
-    # 不是固定问题。
-    # --------------------------------------------------------
+    except Exception:
 
-    result = rag.run(
-        question
-    )
+        logger.exception("RAG 问答接口处理失败")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "AI 服务暂时不可用，请稍后重试"}
+        )
 
     # --------------------------------------------------------
     # 只返回前端需要的数据
@@ -404,9 +477,10 @@ def task_execute(req: TaskRequest):
 
     if not req.task or not req.task.strip():
 
-        return {
-            "error": "任务不能为空。"
-        }
+        return JSONResponse(
+            status_code=400,
+            content={"error": "任务不能为空。"}
+        )
 
     task = req.task.strip()
 
@@ -414,9 +488,19 @@ def task_execute(req: TaskRequest):
     # 执行 Agent
     # --------------------------------------------------------
 
-    result = workflow.run(
-        task
-    )
+    try:
+
+        result = _get_workflow().run(
+            task
+        )
+
+    except Exception:
+
+        logger.exception("Agent 任务接口处理失败")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "AI 服务暂时不可用，请稍后重试"}
+        )
 
     return result
 
@@ -438,17 +522,28 @@ def calculate_kci(req: KCIRequest):
 
     if req.data is None:
 
-        return {
-            "error": "评价数据不能为空。"
-        }
+        return JSONResponse(
+            status_code=400,
+            content={"error": "评价数据不能为空。"}
+        )
 
     # --------------------------------------------------------
     # 计算 KCI
     # --------------------------------------------------------
 
-    result = kci_model.calculate(
-        req.data
-    )
+    try:
+
+        result = _get_kci_model().calculate(
+            req.data
+        )
+
+    except Exception:
+
+        logger.exception("KCI 接口处理失败")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "AI 服务暂时不可用，请稍后重试"}
+        )
 
     return result
 
@@ -480,20 +575,31 @@ def learning_plan(req: PlanRequest):
 
     if req.kci < 0 or req.kci > 1:
 
-        return {
-            "error": "KCI 应该在 0 到 1 之间。"
-        }
+        return JSONResponse(
+            status_code=400,
+            content={"error": "KCI 应该在 0 到 1 之间。"}
+        )
 
     # --------------------------------------------------------
     # 生成学习计划
     # --------------------------------------------------------
 
-    result = planner.generate_plan(
-        {
-            "KCI": req.kci,
-            "weak_points": req.weak_points
-        }
-    )
+    try:
+
+        result = _get_planner().generate_plan(
+            {
+                "KCI": req.kci,
+                "weak_points": req.weak_points
+            }
+        )
+
+    except Exception:
+
+        logger.exception("学习规划接口处理失败")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "AI 服务暂时不可用，请稍后重试"}
+        )
 
     return result
 

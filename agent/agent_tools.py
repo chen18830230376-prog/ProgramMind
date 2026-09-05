@@ -14,7 +14,14 @@ Agent工具集
 
 
 import datetime
+import logging
 
+from core.model_deploy import LLMModel
+from core.prompt_template import PromptTemplate
+from knowledge.vector_retrieval import VectorRetriever
+
+
+logger = logging.getLogger(__name__)
 
 
 # ==============================
@@ -24,20 +31,27 @@ import datetime
 
 class RAGTool:
 
-
     def __init__(self):
 
         """
-        实际项目中这里连接:
+        真实检索器采用懒加载：
 
-        knowledge/
-        vector_retrieval.py
-
+        首次 search() 时才初始化
+        VectorRetriever（bge-m3 + PGVector），
+        避免工具创建阶段就加载 Embedding 模型。
         """
 
-        pass
+        self.retriever = None
 
+    def _get_retriever(self):
 
+        if self.retriever is None:
+
+            self.retriever = VectorRetriever(
+                threshold=0.5
+            )
+
+        return self.retriever
 
     def search(
         self,
@@ -46,40 +60,65 @@ class RAGTool:
     ):
 
         """
-        知识检索
+        知识检索（真实链路：bge-m3 向量化 → PGVector 相似度检索）
 
         输入:
         query:
             用户问题
 
         输出:
-        检索知识片段
+        检索到的知识片段列表
+        [
+            {"content": ..., "source": ..., "score": ...},
+            ...
+        ]
+
+        检索失败时返回 {"error": "..."}，不抛异常。
         """
 
+        if not query:
 
-
-        result=[]
-
-
-        # Demo数据
-        # 实际接PGVector
-
-        result.append(
-
-            {
-            "content":
-            f"关于{query}的课程知识内容",
-
-            "source":
-            "计算机专业教材",
-
-            "score":
-            0.92
-
+            return {
+                "error": "检索问题不能为空"
             }
 
-        )
+        try:
 
+            retriever = self._get_retriever()
+
+            docs = retriever.search(
+                query,
+                top_k=top_k
+            )
+
+        except Exception as e:
+
+            logger.exception("RAG 工具检索失败")
+            return {
+                "error": f"知识检索失败：{e}"
+            }
+
+        # ----------------------------------------------------
+        # 只返回工具需要的字段
+        # ----------------------------------------------------
+
+        result = []
+
+        for doc in docs:
+
+            result.append(
+                {
+                    "content": doc.get("content", ""),
+                    "source": doc.get("source"),
+                    "score": doc.get("score", 0.0)
+                }
+            )
+
+        if not result:
+
+            return {
+                "error": "知识库中未找到相关内容"
+            }
 
         return result
 
@@ -94,67 +133,126 @@ class RAGTool:
 
 class LiteratureTool:
 
+    def __init__(self):
 
+        """
+        LLM 采用懒加载：首次 analyze/summarize 时才初始化，
+        文献类任务经 ModelRouter 路由到 DeepSeek。
+        """
+
+        self.llm = None
+
+    def _get_llm(self):
+
+        if self.llm is None:
+
+            self.llm = LLMModel()
+
+        return self.llm
 
     def analyze(
         self,
         paper_text
     ):
 
-
         """
-        文献分析
+        文献分析（真实链路：research_review 模板 → DeepSeek）
 
         输出:
-        - 研究方向
-        - 方法
-        - 创新点
+        - research_topic: 研究主题
+        - analysis: 研究现状 / 技术路线 / 代表方法 / 未来方向
+
+        调用失败时返回 {"error": "..."}，不抛异常。
         """
 
+        if not paper_text:
 
+            return {
+                "error": "文献内容不能为空"
+            }
+
+        try:
+
+            prompt = (
+                PromptTemplate.research_review().format(
+                    topic=paper_text
+                )
+            )
+
+            answer = self._get_llm().generate(
+                prompt,
+                task="论文"
+            )
+
+        except Exception as e:
+
+            logger.exception("文献分析失败")
+            return {
+                "error": f"文献分析失败：{e}"
+            }
 
         return {
-
-
-            "research_topic":
-            "人工智能相关研究",
-
-
-            "method":
-            "深度学习模型",
-
-
-            "innovation":
-            "模型优化方法"
-
-
+            "research_topic": paper_text,
+            "analysis": answer
         }
-
-
-
-
 
     def summarize(
         self,
         papers
     ):
 
+        """
+        文献综述生成（真实链路：DeepSeek）
 
+        输入:
+        papers:
+            文献内容字符串或文献列表
+
+        输出:
+        {"summary": 综述文本}
+
+        调用失败时返回 {"error": "..."}，不抛异常。
         """
-        文献综述生成
-        """
+
+        if not papers:
+
+            return {
+                "error": "文献内容不能为空"
+            }
+
+        if isinstance(papers, (list, tuple)):
+
+            text = "\n\n".join(str(p) for p in papers)
+
+        else:
+
+            text = str(papers)
+
+        try:
+
+            prompt = (
+                "你是一名科研助手。请阅读以下文献内容，"
+                "输出一篇结构清晰的文献综述，"
+                "包括：1. 研究背景 2. 主要方法 3. 关键结论 "
+                "4. 研究不足与展望。\n\n"
+                f"文献内容：\n{text}"
+            )
+
+            summary = self._get_llm().generate(
+                prompt,
+                task="论文"
+            )
+
+        except Exception as e:
+
+            logger.exception("文献综述生成失败")
+            return {
+                "error": f"文献综述生成失败：{e}"
+            }
 
         return {
-
-
-            "summary":
-            "该方向主要研究人工智能模型优化和应用"
-
-
+            "summary": summary
         }
-
-
-
 
 
 # ==============================

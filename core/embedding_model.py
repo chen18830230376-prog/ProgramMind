@@ -17,11 +17,17 @@ BAAI/bge-m3
 6. 为后续 PGVector 提供向量数据
 """
 
+import logging
 import os
+
+import torch
 
 from dotenv import load_dotenv
 
 from sentence_transformers import SentenceTransformer
+
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================
@@ -44,7 +50,7 @@ MODEL_NAME = os.getenv(
 DEVICE = os.getenv(
     "DEVICE",
     "cpu"
-)
+).strip().lower()
 
 
 # ============================================================
@@ -101,6 +107,14 @@ class EmbeddingModel:
         if device is None:
 
             device = DEVICE
+
+        # 请求 cuda 但 torch 无 CUDA 支持时回退 CPU（与 qwen_model 行为一致）
+        if device == "cuda" and not torch.cuda.is_available():
+
+            logger.warning(
+                "请求使用 cuda，但 torch 未启用 CUDA，回退到 cpu"
+            )
+            device = "cpu"
 
         self.model_name = model_name
 
@@ -223,18 +237,25 @@ class EmbeddingModel:
         # 生成向量
         # ----------------------------------------------------
 
-        vectors = self.model.encode(
+        try:
 
-            cleaned_texts,
+            vectors = self.model.encode(
 
-            batch_size=batch_size,
+                cleaned_texts,
 
-            show_progress_bar=show_progress_bar,
+                batch_size=batch_size,
 
-            normalize_embeddings=True,
+                show_progress_bar=show_progress_bar,
 
-            convert_to_numpy=True
-        )
+                normalize_embeddings=True,
+
+                convert_to_numpy=True
+            )
+
+        except Exception as e:
+
+            logger.exception("Embedding 批量编码失败")
+            raise RuntimeError(f"Embedding 编码失败: {e}") from e
 
         # ----------------------------------------------------
         # 转换为 Python list
@@ -274,14 +295,21 @@ class EmbeddingModel:
                 "text 不能为空字符串"
             )
 
-        vector = self.model.encode(
+        try:
 
-            text,
+            vector = self.model.encode(
 
-            normalize_embeddings=True,
+                text,
 
-            convert_to_numpy=True
-        )
+                normalize_embeddings=True,
+
+                convert_to_numpy=True
+            )
+
+        except Exception as e:
+
+            logger.exception("Embedding 单条编码失败")
+            raise RuntimeError(f"Embedding 编码失败: {e}") from e
 
         return vector.tolist()
 

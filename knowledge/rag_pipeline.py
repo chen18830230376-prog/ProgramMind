@@ -34,11 +34,16 @@ Qwen
     DeepSeek
 """
 
+import logging
+
 from .vector_retrieval import VectorRetriever
 from .source_trace import SourceTracer
 
 from core.prompt_template import PromptTemplate
 from core.model_deploy import LLMModel
+
+
+logger = logging.getLogger(__name__)
 
 
 class RAGPipeline:
@@ -140,6 +145,24 @@ class RAGPipeline:
         )
 
         # ----------------------------------------------------
+        # 检索为空：直接返回提示，不再调用大模型
+        # ----------------------------------------------------
+
+        if not docs:
+
+            logger.info(
+                "RAG 检索为空，直接返回提示: %s",
+                question
+            )
+
+            return {
+                "question": question,
+                "answer": "知识库中未找到相关内容",
+                "sources": [],
+                "retrieved_docs": []
+            }
+
+        # ----------------------------------------------------
         # 第二步：构造知识上下文
         # ----------------------------------------------------
 
@@ -148,83 +171,82 @@ class RAGPipeline:
             "第 2 步：正在构造知识上下文..."
         )
 
-        context_parts = []
+        try:
 
-        for i, doc in enumerate(
-            docs,
-            start=1
-        ):
+            context_parts = []
 
-            content = doc.get(
-                "content",
-                ""
-            )
+            for i, doc in enumerate(
+                docs,
+                start=1
+            ):
 
-            source = doc.get(
-                "source",
-                "未知来源"
-            )
-
-            score = float(
-                doc.get(
-                    "score",
-                    0.0
+                content = doc.get(
+                    "content",
+                    ""
                 )
-            )
 
-            context_parts.append(
-                f"[知识片段 {i}]\n"
-                f"来源：{source}\n"
-                f"相似度：{score:.4f}\n"
-                f"内容：{content}"
-            )
+                source = doc.get(
+                    "source",
+                    "未知来源"
+                )
 
-        if context_parts:
+                try:
+
+                    score = float(
+                        doc.get(
+                            "score",
+                            0.0
+                        )
+                    )
+
+                except (TypeError, ValueError):
+
+                    score = 0.0
+
+                context_parts.append(
+                    f"[知识片段 {i}]\n"
+                    f"来源：{source}\n"
+                    f"相似度：{score:.4f}\n"
+                    f"内容：{content}"
+                )
 
             context = "\n\n".join(
                 context_parts
-            )
-
-        else:
-
-            context = (
-                "当前知识库中没有找到"
-                "与问题相关的知识。"
             )
 
         # ----------------------------------------------------
         # 第三步：构造 RAG Prompt
         # ----------------------------------------------------
 
-        print()
-        print(
-            "第 3 步：正在构造 RAG Prompt..."
-        )
+            print()
+            print(
+                "第 3 步：正在构造 RAG Prompt..."
+            )
 
-        prompt_template = (
-            PromptTemplate.rag_answer()
-        )
+            prompt_template = (
+                PromptTemplate.rag_answer()
+            )
 
-        prompt = prompt_template.format(
-            context=context,
-            question=question
-        )
+            prompt = prompt_template.format(
+                context=context,
+                question=question
+            )
 
         # ----------------------------------------------------
         # 第四步：调用模型
         # ----------------------------------------------------
 
-        if self.llm is None:
+            if self.llm is None:
 
-            raise RuntimeError(
-                "LLM 尚未初始化，"
-                "请使用 RAGPipeline(load_llm=True)"
+                raise RuntimeError(
+                    "LLM 尚未初始化，"
+                    "请使用 RAGPipeline(load_llm=True)"
+                )
+
+            print()
+            print(
+                "第 4 步：正在调用 RAG 模型..."
             )
-
-        print()
-        print(
-            "第 4 步：正在调用 RAG 模型..."
-        )
 
         # ----------------------------------------------------
         # RAG → ModelRouter
@@ -232,23 +254,28 @@ class RAGPipeline:
         # RAG 在 ModelRouter 中被定义为 Qwen 任务。
         # ----------------------------------------------------
 
-        answer = self.llm.generate(
-            prompt,
-            task="RAG"
-        )
+            answer = self.llm.generate(
+                prompt,
+                task="RAG"
+            )
 
         # ----------------------------------------------------
         # 第五步：来源追踪
         # ----------------------------------------------------
 
-        print()
-        print(
-            "第 5 步：正在生成知识来源..."
-        )
+            print()
+            print(
+                "第 5 步：正在生成知识来源..."
+            )
 
-        sources = self.tracer.trace(
-            docs
-        )
+            sources = self.tracer.trace(
+                docs
+            )
+
+        except Exception as e:
+
+            logger.exception("RAG 流程失败")
+            raise RuntimeError(f"RAG 流程失败: {e}") from e
 
         # ----------------------------------------------------
         # 返回结果

@@ -154,12 +154,18 @@ class VectorRetriever:
 
         for item in results:
 
-            score = float(
-                item.get(
-                    "score",
-                    0.0
+            try:
+
+                score = float(
+                    item.get(
+                        "score",
+                        0.0
+                    )
                 )
-            )
+
+            except (TypeError, ValueError):
+
+                score = 0.0
 
             if score >= threshold:
 

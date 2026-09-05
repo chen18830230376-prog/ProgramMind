@@ -23,6 +23,7 @@ Qwen 本地大模型
 - GPU + CPU Offload
 """
 
+import logging
 import os
 from threading import Thread
 
@@ -34,7 +35,11 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     TextIteratorStreamer,
+    BitsAndBytesConfig,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================
@@ -202,6 +207,16 @@ Qwen 模型不存在：
                 "cpu": "16GiB",
             }
 
+            quantization_config = BitsAndBytesConfig(
+                 load_in_4bit=True,
+
+                 bnb_4bit_compute_dtype=torch.float16,
+
+                 bnb_4bit_quant_type="nf4",
+
+                 bnb_4bit_use_double_quant=True,
+            )
+
             self.model = (
                 AutoModelForCausalLM.from_pretrained(
                     MODEL_PATH,
@@ -213,6 +228,8 @@ Qwen 模型不存在：
 
                     # 自动进行 GPU + CPU 分配
                     device_map="auto",
+
+                    quantization_config=quantization_config,
 
                     max_memory=max_memory,
 
@@ -632,37 +649,44 @@ Qwen 模型不存在：
         # 生成
         # ----------------------------------------------------
 
-        with torch.inference_mode():
+        try:
 
-            outputs = (
-                self.model.generate(
-                    **generation_kwargs
+            with torch.inference_mode():
+
+                outputs = (
+                    self.model.generate(
+                        **generation_kwargs
+                    )
+                )
+
+            # ----------------------------------------------------
+            # 去掉原始 Prompt
+            # ----------------------------------------------------
+
+            input_length = (
+                inputs["input_ids"]
+                .shape[1]
+            )
+
+            answer_tokens = (
+                outputs[0][input_length:]
+            )
+
+            # ----------------------------------------------------
+            # Token → 文本
+            # ----------------------------------------------------
+
+            answer = (
+                self.tokenizer.decode(
+                    answer_tokens,
+                    skip_special_tokens=True,
                 )
             )
 
-        # ----------------------------------------------------
-        # 去掉原始 Prompt
-        # ----------------------------------------------------
+        except Exception as e:
 
-        input_length = (
-            inputs["input_ids"]
-            .shape[1]
-        )
-
-        answer_tokens = (
-            outputs[0][input_length:]
-        )
-
-        # ----------------------------------------------------
-        # Token → 文本
-        # ----------------------------------------------------
-
-        answer = (
-            self.tokenizer.decode(
-                answer_tokens,
-                skip_special_tokens=True,
-            )
-        )
+            logger.exception("Qwen 生成失败")
+            raise RuntimeError(f"Qwen 生成失败: {e}") from e
 
         return answer.strip()
 
@@ -732,10 +756,19 @@ Qwen 模型不存在：
         # ----------------------------------------------------
         # 后台生成线程
         # ----------------------------------------------------
+        # 生成在 daemon 线程中执行，异常不会自动外抛，
+        # 这里收集线程异常并在流式结束后抛出。
+
+        thread_errors = []
+
+        def _run_generate():
+            try:
+                self.model.generate(**generation_kwargs)
+            except Exception as e:
+                thread_errors.append(e)
 
         thread = Thread(
-            target=self.model.generate,
-            kwargs=generation_kwargs,
+            target=_run_generate,
             daemon=True,
         )
 
@@ -745,9 +778,18 @@ Qwen 模型不存在：
         # 持续返回文本
         # ----------------------------------------------------
 
-        for text in streamer:
+        try:
+            for text in streamer:
+                yield text
+        except Exception as e:
+            logger.exception("Qwen 流式输出中断")
+            raise RuntimeError(f"Qwen 流式生成失败: {e}") from e
+        finally:
+            thread.join()
 
-            yield text
+        if thread_errors:
+            logger.error("Qwen 流式生成线程异常: %s", thread_errors[0])
+            raise RuntimeError(f"Qwen 流式生成失败: {thread_errors[0]}")
 
 
 # ============================================================

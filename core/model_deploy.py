@@ -48,9 +48,14 @@ Qwen          DeepSeek
 # 导入模型
 # ============================================================
 
+import logging
+
 from core.qwen_model import QwenModel
 from core.deepseek_model import DeepSeekModel
 from core.model_router import ModelRouter
+
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================
@@ -226,42 +231,42 @@ class LLMModel:
         print("-" * 60)
 
         # ====================================================
-        # 第二步：调用 Qwen
+        # 第二步：调用模型（主模型失败自动降级备用模型）
         # ====================================================
 
-        if model_name == "qwen":
+        order = (
+            [model_name]
+            + (["deepseek"] if model_name == "qwen" else ["qwen"])
+        )
 
-            model = self._load_qwen()
+        last_err = None
 
-            answer = model.generate(
-                prompt
-            )
+        for name in order:
 
-            return answer
+            try:
 
-        # ====================================================
-        # 第三步：调用 DeepSeek
-        # ====================================================
+                if name == "qwen":
 
-        elif model_name == "deepseek":
+                    model = self._load_qwen()
 
-            model = self._load_deepseek()
+                else:
 
-            answer = model.generate(
-                prompt
-            )
+                    model = self._load_deepseek()
 
-            return answer
+                return model.generate(prompt)
 
-        # ====================================================
-        # 未知模型
-        # ====================================================
+            except Exception as e:
 
-        else:
+                last_err = e
+                logger.warning(
+                    "模型 %s 生成失败，尝试备用模型",
+                    name,
+                    exc_info=True
+                )
 
-            raise ValueError(
-                f"未知模型：{model_name}"
-            )
+        raise RuntimeError(
+            f"所有模型生成失败: {last_err}"
+        )
 
     # ========================================================
     # 流式生成接口
@@ -317,40 +322,46 @@ class LLMModel:
         print("-" * 60)
 
         # ====================================================
-        # Qwen流式输出
+        # 调用模型（主模型失败自动降级备用模型）
         # ====================================================
 
-        if model_name == "qwen":
+        order = (
+            [model_name]
+            + (["deepseek"] if model_name == "qwen" else ["qwen"])
+        )
 
-            model = self._load_qwen()
+        last_err = None
 
-            # QwenModel 必须提供 stream_generate
-            for text in model.stream_generate(prompt):
+        for name in order:
 
-                yield text
+            try:
 
-        # ====================================================
-        # DeepSeek流式输出
-        # ====================================================
+                if name == "qwen":
 
-        elif model_name == "deepseek":
+                    model = self._load_qwen()
 
-            model = self._load_deepseek()
+                else:
 
-            # DeepSeekModel 必须提供 stream_generate
-            for text in model.stream_generate(prompt):
+                    model = self._load_deepseek()
 
-                yield text
+                for text in model.stream_generate(prompt):
 
-        # ====================================================
-        # 未知模型
-        # ====================================================
+                    yield text
 
-        else:
+                return
 
-            raise ValueError(
-                f"未知模型：{model_name}"
-            )
+            except Exception as e:
+
+                last_err = e
+                logger.warning(
+                    "模型 %s 流式生成失败，尝试备用模型",
+                    name,
+                    exc_info=True
+                )
+
+        raise RuntimeError(
+            f"所有模型流式生成失败: {last_err}"
+        )
 
     # ========================================================
     # 多轮对话接口

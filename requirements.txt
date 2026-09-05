@@ -1,1 +1,16 @@
-#依赖环境
+# ProgramMind 运行依赖
+# 安装: pip install -r requirements.txt
+fastapi
+uvicorn[standard]
+pydantic
+openai
+python-dotenv
+psycopg2-binary
+pgvector
+sentence-transformers
+transformers
+torch
+accelerate
+numpy
+pypdf
+python-docx

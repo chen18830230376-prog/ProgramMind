@@ -24,6 +24,11 @@ DeepSeek：
     科研
 """
 
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 class ModelRouter:
     """
@@ -113,6 +118,10 @@ class ModelRouter:
         else:
 
             # 未知任务默认使用 Qwen
+            logger.warning(
+                "未知任务类型 %s，默认路由到 qwen",
+                task
+            )
             return "qwen"
 
 
