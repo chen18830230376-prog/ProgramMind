@@ -1,0 +1,142 @@
+[
+  {
+    "file": "shot_login.png",
+    "label": "登录页（学生/教师双角色）",
+    "size": [
+      1600,
+      1000
+    ],
+    "colors": 3670,
+    "spread": 248,
+    "el_buttons": 1,
+    "text_ok": true,
+    "extra_ok": true,
+    "pass": true
+  },
+  {
+    "file": "shot_workspace_student.png",
+    "label": "学生工作台（任务中心）",
+    "size": [
+      1600,
+      1000
+    ],
+    "colors": 3108,
+    "spread": 250,
+    "el_buttons": 0,
+    "text_ok": true,
+    "extra_ok": true,
+    "pass": false
+  },
+  {
+    "file": "shot_courses_catalog.png",
+    "label": "课程广场（选课中心）",
+    "size": [
+      1600,
+      1000
+    ],
+    "colors": 1521,
+    "spread": 246,
+    "el_buttons": 3,
+    "text_ok": true,
+    "extra_ok": true,
+    "pass": true
+  },
+  {
+    "file": "shot_ai_tutor.png",
+    "label": "AI 学习辅导（流式回答+知识来源）",
+    "size": [
+      1600,
+      1000
+    ],
+    "colors": 945,
+    "spread": 242,
+    "el_buttons": 2,
+    "text_ok": true,
+    "extra_ok": true,
+    "pass": true
+  },
+  {
+    "file": "shot_quiz_result.png",
+    "label": "测验成绩与知识点分析（100 分）",
+    "size": [
+      1600,
+      1000
+    ],
+    "colors": 907,
+    "spread": 251,
+    "el_buttons": 3,
+    "text_ok": true,
+    "extra_ok": true,
+    "pass": true
+  },
+  {
+    "file": "shot_growth.png",
+    "label": "成长中心（掌握度与画像变化）",
+    "size": [
+      1600,
+      1000
+    ],
+    "colors": 2483,
+    "spread": 248,
+    "el_buttons": 1,
+    "text_ok": true,
+    "extra_ok": true,
+    "pass": true
+  },
+  {
+    "file": "shot_workspace_teacher.png",
+    "label": "教师工作台（待办中心）",
+    "size": [
+      1600,
+      1000
+    ],
+    "colors": 3206,
+    "spread": 252,
+    "el_buttons": 1,
+    "text_ok": true,
+    "extra_ok": true,
+    "pass": true
+  },
+  {
+    "file": "shot_ai_lesson_plan.png",
+    "label": "AI 教案生成结果",
+    "size": [
+      1600,
+      1000
+    ],
+    "colors": 826,
+    "spread": 249,
+    "el_buttons": 2,
+    "text_ok": true,
+    "extra_ok": true,
+    "pass": true
+  },
+  {
+    "file": "shot_ai_class_summary.png",
+    "label": "AI 学情总结生成结果",
+    "size": [
+      1600,
+      1000
+    ],
+    "colors": 972,
+    "spread": 250,
+    "el_buttons": 1,
+    "text_ok": true,
+    "extra_ok": true,
+    "pass": true
+  },
+  {
+    "file": "shot_analytics.png",
+    "label": "教师学情分析看板",
+    "size": [
+      1600,
+      1000
+    ],
+    "colors": 1390,
+    "spread": 242,
+    "el_buttons": 0,
+    "text_ok": true,
+    "extra_ok": true,
+    "pass": false
+  }
+]

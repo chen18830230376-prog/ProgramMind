@@ -141,9 +141,33 @@ class VectorRetriever:
         # PGVector 检索
         # ----------------------------------------------------
 
+        # ----------------------------------------------------
+        # 候选召回扩展
+        #
+        # 内部多取候选（max(2N, N+3)），再经阈值过滤与去重后
+        # 截断回用户请求的 top_k，保证“返回条数不超过 N”的语义不变。
+        # ----------------------------------------------------
+
+        try:
+
+            requested_k = int(top_k)
+
+        except (TypeError, ValueError):
+
+            requested_k = 5
+
+        if requested_k < 1:
+
+            requested_k = 1
+
+        candidate_k = max(
+            requested_k * 2,
+            requested_k + 3
+        )
+
         results = self.db.search(
             query_vector=vector,
-            top_k=top_k
+            top_k=candidate_k
         )
 
         # ----------------------------------------------------
@@ -193,7 +217,32 @@ class VectorRetriever:
                     }
                 )
 
-        return output
+        # ----------------------------------------------------
+        # ??????
+        # ----------------------------------------------------
+        # ??????????????????????????????????
+        deduplicated = []
+        seen_contents = set()
+
+        for item in output:
+            content = str(
+                item.get("content", "")
+            ).strip()
+
+            if not content:
+                continue
+
+            normalized_content = " ".join(
+                content.split()
+            )
+
+            if normalized_content in seen_contents:
+                continue
+
+            seen_contents.add(normalized_content)
+            deduplicated.append(item)
+
+        return deduplicated[:requested_k]
 
     # ========================================================
     # 关闭

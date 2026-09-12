@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="580" viewBox="0 0 420 580" font-family="'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#165DFF"/>
+      <stop offset="0.55" stop-color="#0E42D2"/>
+      <stop offset="1" stop-color="#06208A"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="0.8" cy="0.15" r="0.8">
+      <stop offset="0" stop-color="#6BA1FF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#6BA1FF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="spine1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#000000" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 书脊阴影 -->
+  <rect x="0" y="0" width="420" height="580" fill="url(#bg1)"/>
+  <rect x="0" y="0" width="22" height="580" fill="url(#spine1)"/>
+  <rect x="0" y="0" width="10" height="580" fill="#000000" opacity="0.18"/>
+
+  <!-- 光晕 -->
+  <rect x="0" y="0" width="420" height="580" fill="url(#glow1)"/>
+
+  <!-- 装饰：Python 代码括号 + 节点 -->
+  <g stroke="#BEDAFF" stroke-opacity="0.5" fill="none" stroke-width="2.5">
+    <path d="M70 360 q-26 40 0 80 q26 40 0 80"/>
+    <path d="M350 360 q26 40 0 80 q-26 40 0 80"/>
+  </g>
+  <g fill="#BEDAFF" fill-opacity="0.85">
+    <circle cx="120" cy="430" r="5"/>
+    <circle cx="180" cy="470" r="5"/>
+    <circle cx="250" cy="450" r="5"/>
+    <circle cx="300" cy="500" r="5"/>
+  </g>
+  <g stroke="#BEDAFF" stroke-opacity="0.4" stroke-width="1.5">
+    <line x1="120" y1="430" x2="180" y2="470"/>
+    <line x1="180" y1="470" x2="250" y2="450"/>
+    <line x1="250" y1="450" x2="300" y2="500"/>
+  </g>
+  <g fill="#6BA1FF" fill-opacity="0.9" font-family="monospace" font-size="20">
+    <text x="300" y="120">def</text>
+    <text x="120" y="170" fill="#94BFFF">print()</text>
+  </g>
+
+  <!-- 出版社标 -->
+  <text x="42" y="64" fill="#E8F3FF" font-size="14" letter-spacing="1" opacity="0.92">普通高等教育 · 计算机类精品教材</text>
+  <line x1="42" y1="78" x2="300" y2="78" stroke="#E8F3FF" stroke-opacity="0.5" stroke-width="1"/>
+
+  <!-- 主标题 -->
+  <text x="40" y="250" fill="#FFFFFF" font-size="52" font-weight="800">Python</text>
+  <text x="40" y="312" fill="#FFFFFF" font-size="52" font-weight="800">程序设计</text>
+  <rect x="42" y="338" width="64" height="6" rx="3" fill="#FF7D00"/>
+  <text x="42" y="372" fill="#BEDAFF" font-size="18" font-weight="600">第 2 版 · 面向零基础到项目实战</text>
+
+  <!-- 课程代码 -->
+  <text x="42" y="500" fill="#E8F3FF" font-size="15" opacity="0.9">课程代码 CS101</text>
+
+  <!-- 作者 -->
+  <text x="42" y="528" fill="#FFFFFF" font-size="16" font-weight="600">主编　张明远</text>
+
+  <!-- 出版社 -->
+  <text x="42" y="556" fill="#BEDAFF" font-size="13" opacity="0.85">ProgramMind 教育出品 · 高等教育出版社</text>
+</svg>

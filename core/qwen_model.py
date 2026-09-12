@@ -25,6 +25,7 @@ Qwen 本地大模型
 
 import logging
 import os
+import time
 from threading import Thread
 
 import torch
@@ -36,6 +37,8 @@ from transformers import (
     AutoModelForCausalLM,
     TextIteratorStreamer,
     BitsAndBytesConfig,
+    StoppingCriteria,
+    StoppingCriteriaList,
 )
 
 
@@ -62,6 +65,63 @@ DEVICE = os.getenv(
     "DEVICE",
     "cpu",
 ).strip().lower()
+
+# CPU 兜底开关：默认关闭。
+# 7B 模型在 CPU 上需要 14~28GB 内存，
+# 直接加载会导致系统内存耗尽、进程被强制终止，
+# 因此只有显式设置 QWEN_ALLOW_CPU_FALLBACK=1 时才允许尝试。
+ALLOW_CPU_FALLBACK = os.getenv(
+    "QWEN_ALLOW_CPU_FALLBACK",
+    "0",
+).strip().lower() in ("1", "true", "yes", "on")
+
+# Chat 模板开关：默认开启。
+#
+# Qwen2.5-Instruct 是对话模型，必须套用官方 chat 模板生成。
+# 关闭后回退为“纯文本续写”模式（旧行为），仅用于对比排查。
+USE_CHAT_TEMPLATE = os.getenv(
+    "QWEN_USE_CHAT_TEMPLATE",
+    "1",
+).strip().lower() in ("1", "true", "yes", "on")
+
+
+# ============================================================
+# 生成终止标记
+#
+# 纯文本续写模式下，Qwen 会自己续写下一轮对话
+# （Human: / Assistant: / 用户: / 助手:），
+# 这里作为兜底，一旦出现就立即停止生成。
+# ============================================================
+
+TURN_MARKERS = (
+    "\nHuman:",
+    "\nAssistant:",
+    "\n用户:",
+    "\n助手:",
+)
+
+
+class _TurnMarkerStoppingCriteria(StoppingCriteria):
+    """
+    生成过程中检测到下一轮对话标记时立即停止。
+    """
+
+    def __init__(self, tokenizer, prompt_length):
+        self.tokenizer = tokenizer
+        self.prompt_length = prompt_length
+
+    def __call__(self, input_ids, scores, **kwargs):
+        generated = input_ids[0][self.prompt_length:]
+
+        if generated.shape[0] == 0:
+            return False
+
+        text = self.tokenizer.decode(
+            generated,
+            skip_special_tokens=True,
+        )
+
+        return any(marker in text for marker in TURN_MARKERS)
 
 
 # ============================================================
@@ -191,20 +251,25 @@ Qwen 模型不存在：
         print()
         print("正在加载 Qwen 模型...")
 
+        self.available = False
+        self.quantization = None
+
+        load_start = time.time()
+
         # ----------------------------------------------------
-        # CUDA + CPU Offload
+        # GPU 优先：4bit NF4
         # ----------------------------------------------------
 
         if self.device == "cuda":
 
             # RTX 4060 8GB
             #
-            # 只给 Qwen 使用最多 7GB，
-            # 给 CUDA / 系统 / KV Cache 留余量。
+            # 只给 Qwen 使用最多 6GB，
+            # 给 CUDA / 系统 / KV Cache / bge-m3 留余量。
 
             max_memory = {
-                0: "7GiB",
-                "cpu": "16GiB",
+                0: "6GiB",
+                "cpu": "14GiB",
             }
 
             quantization_config = BitsAndBytesConfig(
@@ -217,56 +282,143 @@ Qwen 模型不存在：
                  bnb_4bit_use_double_quant=True,
             )
 
-            self.model = (
-                AutoModelForCausalLM.from_pretrained(
-                    MODEL_PATH,
+            try:
 
-                    # Transformers 5.x 推荐 dtype
-                    # 不再使用已弃用的 torch_dtype
+                self.model = (
+                    AutoModelForCausalLM.from_pretrained(
+                        MODEL_PATH,
 
-                    dtype=torch.float16,
+                        # Transformers 5.x 推荐 dtype
+                        # 不再使用已弃用的 torch_dtype
 
-                    # 自动进行 GPU + CPU 分配
-                    device_map="auto",
+                        dtype=torch.float16,
 
-                    quantization_config=quantization_config,
+                        # 自动进行 GPU + CPU 分配
+                        device_map="auto",
 
-                    max_memory=max_memory,
+                        quantization_config=quantization_config,
 
-                    # 减少加载阶段 CPU 内存峰值
-                    low_cpu_mem_usage=True,
+                        max_memory=max_memory,
 
-                    trust_remote_code=True,
+                        # 减少加载阶段 CPU 内存峰值
+                        low_cpu_mem_usage=True,
+
+                        trust_remote_code=True,
+                    )
                 )
-            )
 
-        # ----------------------------------------------------
-        # CPU 模式
-        # ----------------------------------------------------
+                self.available = True
+                self.quantization = "4bit-nf4"
+
+                print(
+                    "[Qwen] GPU 4bit NF4 加载成功，耗时 %.1f 秒"
+                    % (time.time() - load_start)
+                )
+
+            except Exception as exc:
+
+                self.model = None
+
+                logger.exception("Qwen GPU 4bit NF4 加载失败")
+
+                print(
+                    "[Qwen] GPU 4bit NF4 加载失败：%r"
+                    % (exc,)
+                )
 
         else:
 
-            self.model = (
-                AutoModelForCausalLM.from_pretrained(
-                    MODEL_PATH,
+            print(
+                "[Qwen] 未检测到可用 CUDA，进入 CPU 分支"
+            )
 
-                    dtype=torch.float32,
+        # ----------------------------------------------------
+        # CPU 兜底：默认关闭
+        #
+        # 7B 模型在 CPU 上需要 14~28GB 内存，
+        # 直接加载会导致系统内存耗尽、进程被强制终止。
+        # ----------------------------------------------------
 
-                    low_cpu_mem_usage=True,
+        if not self.available:
 
-                    trust_remote_code=True,
+            if ALLOW_CPU_FALLBACK:
+
+                print(
+                    "[Qwen] 已启用 CPU 兜底（QWEN_ALLOW_CPU_FALLBACK=1）"
                 )
-            )
 
-            self.model.to(
-                self.device
-            )
+                try:
+
+                    self.model = (
+                        AutoModelForCausalLM.from_pretrained(
+                            MODEL_PATH,
+
+                            # CPU 兜底使用半精度，避免 fp32 导致内存翻倍
+                            dtype=torch.float16,
+
+                            low_cpu_mem_usage=True,
+
+                            trust_remote_code=True,
+                        )
+                    )
+
+                    self.device = "cpu"
+
+                    self.model.to(
+                        "cpu"
+                    )
+
+                    self.available = True
+                    self.quantization = "cpu-fp16"
+
+                    print(
+                        "[Qwen] CPU 兜底加载成功，耗时 %.1f 秒"
+                        % (time.time() - load_start)
+                    )
+
+                except Exception as exc:
+
+                    self.model = None
+
+                    logger.exception("Qwen CPU 兜底加载失败")
+
+                    print(
+                        "[Qwen] CPU 兜底加载失败：%r"
+                        % (exc,)
+                    )
+
+            else:
+
+                print("Qwen CPU fallback disabled; GPU loading failed.")
+                print(
+                    "[Qwen] Qwen 当前不可用；上层进行优雅降级，不返回伪造结果。"
+                )
+
+        # ----------------------------------------------------
+        # 加载失败：提前返回，保持对象可安全调用
+        # ----------------------------------------------------
+
+        if not self.available:
+
+            self.model = None
+
+            print()
+            print("=" * 60)
+            print("Qwen 模型不可用（未加载）")
+            print("=" * 60)
+
+            return
 
         # ----------------------------------------------------
         # 评估模式
         # ----------------------------------------------------
 
         self.model.eval()
+
+        print(
+            "[Qwen] 模型加载完成，耗时 %.1f 秒，设备=%s，量化=%s"
+            % (time.time() - load_start, self.device, self.quantization)
+        )
 
         print()
         print("=" * 60)
@@ -519,6 +671,65 @@ Qwen 模型不存在：
         )
 
     # ========================================================
+    # Chat 模板格式化
+    # ========================================================
+
+    def _format_prompt(
+        self,
+        prompt
+    ):
+        """
+        把 Prompt 包装成 Qwen-Instruct 对话格式。
+
+        Qwen2.5-Instruct 是对话模型：
+
+            套用 chat 模板
+                ↓
+            正常一问一答，遇到 <|im_end|> 自然结束
+
+            不套 chat 模板（纯文本续写）
+                ↓
+            模型会把整段 Prompt 当成待续写文本，
+            自己续写下一轮对话、重复啰嗦、不自然结束
+
+        没有 chat 模板时自动退回纯文本模式。
+        """
+
+        if not USE_CHAT_TEMPLATE:
+
+            return prompt
+
+        if not getattr(
+            self.tokenizer,
+            "chat_template",
+            None
+        ):
+
+            return prompt
+
+        try:
+
+            return self.tokenizer.apply_chat_template(
+                [
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                tokenize=False,
+                add_generation_prompt=True,
+            )
+
+        except Exception:
+
+            logger.warning(
+                "应用 chat 模板失败，退回纯文本 Prompt",
+                exc_info=True
+            )
+
+            return prompt
+
+    # ========================================================
     # 构造输入
     # ========================================================
 
@@ -545,6 +756,14 @@ Qwen 模型不存在：
             raise ValueError(
                 "prompt 不能为空"
             )
+
+        # ----------------------------------------------------
+        # 套用 chat 模板（对话模型必需）
+        # ----------------------------------------------------
+
+        prompt = self._format_prompt(
+            prompt
+        )
 
         # ----------------------------------------------------
         # Tokenizer
@@ -589,15 +808,24 @@ Qwen 模型不存在：
     def generate(
         self,
         prompt,
-        max_tokens=128,
+        max_tokens=512,
         temperature=0.7,
     ):
         """
         普通文本生成。
 
-        默认最多生成 128 tokens，
-        避免学习问答生成过长导致速度过慢。
+        默认最多生成 512 tokens。
+
+        正常情况下模型会在 <|im_end|> 处自然结束，
+        max_tokens 只作为异常情况的硬上限，
+        避免回答过长、生成过慢。
         """
+
+        if not getattr(self, "available", False) or self.model is None:
+
+            raise RuntimeError(
+                "Qwen 模型不可用：GPU 加载失败且 CPU 兜底未启用"
+            )
 
         inputs = (
             self._prepare_inputs(
@@ -615,6 +843,19 @@ Qwen 模型不存在：
             "max_new_tokens": max_tokens,
 
             "repetition_penalty": 1.1,
+
+            # 抑制 “同一句 / 同一串引用标记无限重复” 的退化输出
+            "no_repeat_ngram_size": 4,
+
+            # 兜底：出现下一轮对话标记立即停止
+            "stopping_criteria": StoppingCriteriaList(
+                [
+                    _TurnMarkerStoppingCriteria(
+                        self.tokenizer,
+                        inputs["input_ids"].shape[1]
+                    )
+                ]
+            ),
 
             "pad_token_id": (
                 self.tokenizer.pad_token_id
@@ -688,7 +929,11 @@ Qwen 模型不存在：
             logger.exception("Qwen 生成失败")
             raise RuntimeError(f"Qwen 生成失败: {e}") from e
 
-        return answer.strip()
+        answer = answer.strip()
+        for marker in ("\nHuman:", "\nAssistant:", "\n用户:", "\n助手:"):
+              if marker in answer:
+                    answer = answer.split(marker, 1)[0].rstrip()
+        return answer
 
     # ========================================================
     # 流式生成
@@ -708,6 +953,12 @@ Qwen 模型不存在：
         - Web 前端
         - ChatGPT 式逐步输出
         """
+
+        if not getattr(self, "available", False) or self.model is None:
+
+            raise RuntimeError(
+                "Qwen 模型不可用：GPU 加载失败且 CPU 兜底未启用"
+            )
 
         inputs = (
             self._prepare_inputs(
@@ -743,6 +994,17 @@ Qwen 模型不存在：
             "do_sample": True,
 
             "repetition_penalty": 1.1,
+
+            "no_repeat_ngram_size": 4,
+
+            "stopping_criteria": StoppingCriteriaList(
+                [
+                    _TurnMarkerStoppingCriteria(
+                        self.tokenizer,
+                        inputs["input_ids"].shape[1]
+                    )
+                ]
+            ),
 
             "pad_token_id": (
                 self.tokenizer.pad_token_id

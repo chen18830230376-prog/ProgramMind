@@ -1,0 +1,341 @@
+[
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "",
+    "category": "课程概览",
+    "title": "数据结构",
+    "content": "线性表、树、图、排序与查找，培养算法思维与复杂度分析能力。",
+    "keywords": [
+      "数据结构",
+      "CS201",
+      "C002"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第1章 复杂度分析",
+    "category": "章节",
+    "title": "第1章 复杂度分析",
+    "content": "《数据结构》第1章 复杂度分析 包含知识点：时间复杂度、空间复杂度、渐近记号。",
+    "keywords": [
+      "数据结构",
+      "第1章 复杂度分析",
+      "时间复杂度",
+      "空间复杂度",
+      "渐近记号"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第1章 复杂度分析",
+    "category": "知识点",
+    "title": "时间复杂度",
+    "content": "《数据结构》第1章 复杂度分析 知识点：时间复杂度。",
+    "keywords": [
+      "时间复杂度"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第1章 复杂度分析",
+    "category": "知识点",
+    "title": "空间复杂度",
+    "content": "《数据结构》第1章 复杂度分析 知识点：空间复杂度。",
+    "keywords": [
+      "空间复杂度"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第1章 复杂度分析",
+    "category": "知识点",
+    "title": "渐近记号",
+    "content": "《数据结构》第1章 复杂度分析 知识点：渐近记号。",
+    "keywords": [
+      "渐近记号"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第2章 线性结构",
+    "category": "章节",
+    "title": "第2章 线性结构",
+    "content": "《数据结构》第2章 线性结构 包含知识点：顺序表、链表、栈、队列。",
+    "keywords": [
+      "数据结构",
+      "第2章 线性结构",
+      "顺序表",
+      "链表",
+      "栈",
+      "队列"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第2章 线性结构",
+    "category": "线性",
+    "title": "顺序表",
+    "content": "数组与顺序存储结构，理解随机访问、扩容与插入删除的时间复杂度。",
+    "keywords": [
+      "顺序表"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第2章 线性结构",
+    "category": "线性",
+    "title": "链表",
+    "content": "单链表、双链表与循环链表，掌握指针逻辑与动态内存管理思想。",
+    "keywords": [
+      "链表"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第2章 线性结构",
+    "category": "线性",
+    "title": "栈",
+    "content": "后进先出的线性结构，广泛应用于表达式求值、递归模拟与 DFS。",
+    "keywords": [
+      "栈"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第2章 线性结构",
+    "category": "知识点",
+    "title": "队列",
+    "content": "《数据结构》第2章 线性结构 知识点：队列。",
+    "keywords": [
+      "队列"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第3章 树与二叉树",
+    "category": "章节",
+    "title": "第3章 树与二叉树",
+    "content": "《数据结构》第3章 树与二叉树 包含知识点：二叉树、遍历、堆、二叉搜索树。",
+    "keywords": [
+      "数据结构",
+      "第3章 树与二叉树",
+      "二叉树",
+      "遍历",
+      "堆",
+      "二叉搜索树"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第3章 树与二叉树",
+    "category": "树",
+    "title": "二叉树",
+    "content": "树形结构的基础，重点掌握遍历、搜索树与堆的应用场景。",
+    "keywords": [
+      "二叉树"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第3章 树与二叉树",
+    "category": "知识点",
+    "title": "遍历",
+    "content": "《数据结构》第3章 树与二叉树 知识点：遍历。",
+    "keywords": [
+      "遍历"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第3章 树与二叉树",
+    "category": "树",
+    "title": "堆",
+    "content": "完全二叉树的特殊形式，用于优先队列、Top-K 与堆排序。",
+    "keywords": [
+      "堆"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第3章 树与二叉树",
+    "category": "知识点",
+    "title": "二叉搜索树",
+    "content": "《数据结构》第3章 树与二叉树 知识点：二叉搜索树。",
+    "keywords": [
+      "二叉搜索树"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第4章 图",
+    "category": "章节",
+    "title": "第4章 图",
+    "content": "《数据结构》第4章 图 包含知识点：图的存储、DFS/BFS、最短路径、最小生成树。",
+    "keywords": [
+      "数据结构",
+      "第4章 图",
+      "图的存储",
+      "DFS/BFS",
+      "最短路径",
+      "最小生成树"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第4章 图",
+    "category": "图",
+    "title": "图的存储",
+    "content": "邻接矩阵与邻接表，是图论算法（遍历、最短路径、最小生成树）的基础。",
+    "keywords": [
+      "图的存储"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第4章 图",
+    "category": "知识点",
+    "title": "DFS/BFS",
+    "content": "《数据结构》第4章 图 知识点：DFS/BFS。",
+    "keywords": [
+      "DFS/BFS",
+      "DFS",
+      "BFS"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第4章 图",
+    "category": "图",
+    "title": "最短路径",
+    "content": "Dijkstra、Floyd 等经典算法，解决带权图的最优路径问题。",
+    "keywords": [
+      "最短路径"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第4章 图",
+    "category": "知识点",
+    "title": "最小生成树",
+    "content": "《数据结构》第4章 图 知识点：最小生成树。",
+    "keywords": [
+      "最小生成树"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第5章 排序与查找",
+    "category": "章节",
+    "title": "第5章 排序与查找",
+    "content": "《数据结构》第5章 排序与查找 包含知识点：快排、归并、二分查找、哈希。",
+    "keywords": [
+      "数据结构",
+      "第5章 排序与查找",
+      "快排",
+      "归并",
+      "二分查找",
+      "哈希"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第5章 排序与查找",
+    "category": "知识点",
+    "title": "快排",
+    "content": "《数据结构》第5章 排序与查找 知识点：快排。",
+    "keywords": [
+      "快排"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第5章 排序与查找",
+    "category": "知识点",
+    "title": "归并",
+    "content": "《数据结构》第5章 排序与查找 知识点：归并。",
+    "keywords": [
+      "归并"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第5章 排序与查找",
+    "category": "知识点",
+    "title": "二分查找",
+    "content": "《数据结构》第5章 排序与查找 知识点：二分查找。",
+    "keywords": [
+      "二分查找"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "第5章 排序与查找",
+    "category": "知识点",
+    "title": "哈希",
+    "content": "《数据结构》第5章 排序与查找 知识点：哈希。",
+    "keywords": [
+      "哈希"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "",
+    "category": "课件",
+    "title": "VisuAlgo 算法可视化（中文）",
+    "content": "VisuAlgo 算法可视化（中文）。资源链接：https://visualgo.net/zh",
+    "keywords": [
+      "VisuAlgo 算法可视化（中文）",
+      "课件"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "",
+    "category": "课件",
+    "title": "Data Structure Visualizations（数据结构动画演示）",
+    "content": "Data Structure Visualizations（数据结构动画演示）。资源链接：https://www.cs.usfca.edu/~galles/visualization/Algorithms.html",
+    "keywords": [
+      "Data Structure Visualizations（数据结构动画演示）",
+      "课件"
+    ]
+  },
+  {
+    "course_id": "C002",
+    "course_name": "数据结构",
+    "chapter": "",
+    "category": "课件",
+    "title": "中国大学MOOC · 数据结构（武汉理工）",
+    "content": "中国大学MOOC · 数据结构（武汉理工）。资源链接：https://www.icourse163.org/course/WHUT-1001907004",
+    "keywords": [
+      "中国大学MOOC · 数据结构（武汉理工）",
+      "课件"
+    ]
+  }
+]

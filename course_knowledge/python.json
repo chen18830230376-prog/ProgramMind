@@ -1,0 +1,338 @@
+[
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "",
+    "category": "课程概览",
+    "title": "Python 程序设计",
+    "content": "零基础到能写小型项目，覆盖语法、函数、面向对象、文件与异常处理。",
+    "keywords": [
+      "Python 程序设计",
+      "CS101",
+      "C001"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第1章 环境与基础语法",
+    "category": "章节",
+    "title": "第1章 环境与基础语法",
+    "content": "《Python 程序设计》第1章 环境与基础语法 包含知识点：变量与类型、运算符、输入输出。",
+    "keywords": [
+      "Python 程序设计",
+      "第1章 环境与基础语法",
+      "变量与类型",
+      "运算符",
+      "输入输出"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第1章 环境与基础语法",
+    "category": "基础",
+    "title": "变量与类型",
+    "content": "Python 程序设计的起点，理解变量命名、基本数据类型与类型转换是后续所有编程概念的根基。",
+    "keywords": [
+      "变量与类型"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第1章 环境与基础语法",
+    "category": "知识点",
+    "title": "运算符",
+    "content": "《Python 程序设计》第1章 环境与基础语法 知识点：运算符。",
+    "keywords": [
+      "运算符"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第1章 环境与基础语法",
+    "category": "知识点",
+    "title": "输入输出",
+    "content": "《Python 程序设计》第1章 环境与基础语法 知识点：输入输出。",
+    "keywords": [
+      "输入输出"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第2章 流程控制",
+    "category": "章节",
+    "title": "第2章 流程控制",
+    "content": "《Python 程序设计》第2章 流程控制 包含知识点：条件分支、循环、递归入门。",
+    "keywords": [
+      "Python 程序设计",
+      "第2章 流程控制",
+      "条件分支",
+      "循环",
+      "递归入门"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第2章 流程控制",
+    "category": "知识点",
+    "title": "条件分支",
+    "content": "《Python 程序设计》第2章 流程控制 知识点：条件分支。",
+    "keywords": [
+      "条件分支"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第2章 流程控制",
+    "category": "知识点",
+    "title": "循环",
+    "content": "《Python 程序设计》第2章 流程控制 知识点：循环。",
+    "keywords": [
+      "循环"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第2章 流程控制",
+    "category": "知识点",
+    "title": "递归入门",
+    "content": "《Python 程序设计》第2章 流程控制 知识点：递归入门。",
+    "keywords": [
+      "递归入门"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第3章 函数与模块",
+    "category": "章节",
+    "title": "第3章 函数与模块",
+    "content": "《Python 程序设计》第3章 函数与模块 包含知识点：函数定义、参数传递、作用域、模块导入。",
+    "keywords": [
+      "Python 程序设计",
+      "第3章 函数与模块",
+      "函数定义",
+      "参数传递",
+      "作用域",
+      "模块导入"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第3章 函数与模块",
+    "category": "基础",
+    "title": "函数定义",
+    "content": "掌握 def、参数传递、返回值与作用域，是实现代码复用与模块化设计的核心能力。",
+    "keywords": [
+      "函数定义"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第3章 函数与模块",
+    "category": "知识点",
+    "title": "参数传递",
+    "content": "《Python 程序设计》第3章 函数与模块 知识点：参数传递。",
+    "keywords": [
+      "参数传递"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第3章 函数与模块",
+    "category": "知识点",
+    "title": "作用域",
+    "content": "《Python 程序设计》第3章 函数与模块 知识点：作用域。",
+    "keywords": [
+      "作用域"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第3章 函数与模块",
+    "category": "知识点",
+    "title": "模块导入",
+    "content": "《Python 程序设计》第3章 函数与模块 知识点：模块导入。",
+    "keywords": [
+      "模块导入"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第4章 面向对象",
+    "category": "章节",
+    "title": "第4章 面向对象",
+    "content": "《Python 程序设计》第4章 面向对象 包含知识点：类与对象、继承、多态、封装。",
+    "keywords": [
+      "Python 程序设计",
+      "第4章 面向对象",
+      "类与对象",
+      "继承",
+      "多态",
+      "封装"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第4章 面向对象",
+    "category": "知识点",
+    "title": "类与对象",
+    "content": "《Python 程序设计》第4章 面向对象 知识点：类与对象。",
+    "keywords": [
+      "类与对象"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第4章 面向对象",
+    "category": "知识点",
+    "title": "继承",
+    "content": "《Python 程序设计》第4章 面向对象 知识点：继承。",
+    "keywords": [
+      "继承"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第4章 面向对象",
+    "category": "知识点",
+    "title": "多态",
+    "content": "《Python 程序设计》第4章 面向对象 知识点：多态。",
+    "keywords": [
+      "多态"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第4章 面向对象",
+    "category": "知识点",
+    "title": "封装",
+    "content": "《Python 程序设计》第4章 面向对象 知识点：封装。",
+    "keywords": [
+      "封装"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第5章 文件与异常",
+    "category": "章节",
+    "title": "第5章 文件与异常",
+    "content": "《Python 程序设计》第5章 文件与异常 包含知识点：文件读写、异常处理、上下文管理器。",
+    "keywords": [
+      "Python 程序设计",
+      "第5章 文件与异常",
+      "文件读写",
+      "异常处理",
+      "上下文管理器"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第5章 文件与异常",
+    "category": "知识点",
+    "title": "文件读写",
+    "content": "《Python 程序设计》第5章 文件与异常 知识点：文件读写。",
+    "keywords": [
+      "文件读写"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第5章 文件与异常",
+    "category": "进阶",
+    "title": "异常处理",
+    "content": "通过 try/except/finally 与自定义异常，提升程序的健壮性与容错能力。",
+    "keywords": [
+      "异常处理"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "第5章 文件与异常",
+    "category": "知识点",
+    "title": "上下文管理器",
+    "content": "《Python 程序设计》第5章 文件与异常 知识点：上下文管理器。",
+    "keywords": [
+      "上下文管理器"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "",
+    "category": "进阶",
+    "title": "面向对象",
+    "content": "类、对象、继承、多态与封装，是编写可扩展项目与理解框架源码的关键。",
+    "keywords": [
+      "面向对象"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "",
+    "category": "课件",
+    "title": "Python 官方中文教程",
+    "content": "Python 官方中文教程。资源链接：https://docs.python.org/zh-cn/3.13/tutorial/index.html",
+    "keywords": [
+      "Python 官方中文教程",
+      "课件"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "",
+    "category": "课件",
+    "title": "菜鸟教程 · Python3",
+    "content": "菜鸟教程 · Python3。资源链接：https://www.runoob.com/python3/python3-tutorial.html",
+    "keywords": [
+      "菜鸟教程 · Python3",
+      "课件"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "",
+    "category": "课件",
+    "title": "廖雪峰 Python 教程",
+    "content": "廖雪峰 Python 教程。资源链接：https://www.liaoxuefeng.com/wiki/1016959663602400",
+    "keywords": [
+      "廖雪峰 Python 教程",
+      "课件"
+    ]
+  },
+  {
+    "course_id": "C001",
+    "course_name": "Python 程序设计",
+    "chapter": "",
+    "category": "课件",
+    "title": "Python123 互动课堂",
+    "content": "Python123 互动课堂。资源链接：https://python123.io/index.html",
+    "keywords": [
+      "Python123 互动课堂",
+      "课件"
+    ]
+  }
+]

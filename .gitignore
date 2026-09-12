@@ -38,3 +38,29 @@ Thumbs.db
 # ===== 其他临时文件 =====
 *.pkl
 *.tmp
+
+# ===== ProgramMind Demo Web 层（backend/ + frontend/，本次新增，仅追加）=====
+# Demo 后端运行时产生的 SQLite 数据库与备份（不提交演示数据；源码与 requirements.txt 照常跟踪）
+backend/*.db
+backend/backups/
+
+# 前端运行时上传目录：默认忽略后续新增的上传文件，
+# 仅例外保留迁移时一并带入的种子演示文件
+frontend/uploads/*
+!frontend/uploads/1788164739890_hw.png
+!frontend/uploads/1788167256004_8DBDDAA6CE7C84D10AA6C8469F883A34.jpg
+!frontend/uploads/1788177289094_8DBDDAA6CE7C84D10AA6C8469F883A34.jpg
+!frontend/uploads/1788241308359_8DBDDAA6CE7C84D10AA6C8469F883A34.jpg
+!frontend/uploads/1788253068128_8DBDDAA6CE7C84D10AA6C8469F883A34.jpg
+!frontend/uploads/1788253935737_hw.png
+!frontend/uploads/1788253981047_hw.png
+!frontend/uploads/1788254236827_8DBDDAA6CE7C84D10AA6C8469F883A34.jpg
+!frontend/uploads/1788417710464_-2.pptx
+!frontend/uploads/1788417938693_-2.pptx
+
+# Local databases and backup files
+database/*.db
+*.bak
+*.backup*
+
+*.prompt_backup

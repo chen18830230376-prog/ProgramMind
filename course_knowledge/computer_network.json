@@ -1,0 +1,295 @@
+[
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "",
+    "category": "课程概览",
+    "title": "计算机网络",
+    "content": "自顶向下理解协议栈：应用层、传输层、网络层、链路层与网络安全。",
+    "keywords": [
+      "计算机网络",
+      "CS301",
+      "C003"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第1章 网络分层模型",
+    "category": "章节",
+    "title": "第1章 网络分层模型",
+    "content": "《计算机网络》第1章 网络分层模型 包含知识点：OSI模型、TCP/IP模型、封装与解耦。",
+    "keywords": [
+      "计算机网络",
+      "第1章 网络分层模型",
+      "OSI模型",
+      "TCP/IP模型",
+      "封装与解耦"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第1章 网络分层模型",
+    "category": "知识点",
+    "title": "OSI模型",
+    "content": "《计算机网络》第1章 网络分层模型 知识点：OSI模型。",
+    "keywords": [
+      "OSI模型"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第1章 网络分层模型",
+    "category": "知识点",
+    "title": "TCP/IP模型",
+    "content": "《计算机网络》第1章 网络分层模型 知识点：TCP/IP模型。",
+    "keywords": [
+      "TCP/IP模型",
+      "TCP",
+      "IP模型"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第1章 网络分层模型",
+    "category": "知识点",
+    "title": "封装与解耦",
+    "content": "《计算机网络》第1章 网络分层模型 知识点：封装与解耦。",
+    "keywords": [
+      "封装与解耦"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第2章 应用层",
+    "category": "章节",
+    "title": "第2章 应用层",
+    "content": "《计算机网络》第2章 应用层 包含知识点：HTTP、DNS、FTP。",
+    "keywords": [
+      "计算机网络",
+      "第2章 应用层",
+      "HTTP",
+      "DNS",
+      "FTP"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第2章 应用层",
+    "category": "应用层",
+    "title": "HTTP",
+    "content": "Web 应用的基石，理解请求方法、状态码、报文结构与 REST 设计。",
+    "keywords": [
+      "HTTP"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第2章 应用层",
+    "category": "知识点",
+    "title": "DNS",
+    "content": "《计算机网络》第2章 应用层 知识点：DNS。",
+    "keywords": [
+      "DNS"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第2章 应用层",
+    "category": "知识点",
+    "title": "FTP",
+    "content": "《计算机网络》第2章 应用层 知识点：FTP。",
+    "keywords": [
+      "FTP"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第3章 传输层",
+    "category": "章节",
+    "title": "第3章 传输层",
+    "content": "《计算机网络》第3章 传输层 包含知识点：TCP、UDP、可靠传输、拥塞控制。",
+    "keywords": [
+      "计算机网络",
+      "第3章 传输层",
+      "TCP",
+      "UDP",
+      "可靠传输",
+      "拥塞控制"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第3章 传输层",
+    "category": "传输层",
+    "title": "TCP",
+    "content": "可靠传输、流量控制与拥塞控制，是理解网络通信稳定性的核心。",
+    "keywords": [
+      "TCP"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第3章 传输层",
+    "category": "知识点",
+    "title": "UDP",
+    "content": "《计算机网络》第3章 传输层 知识点：UDP。",
+    "keywords": [
+      "UDP"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第3章 传输层",
+    "category": "知识点",
+    "title": "可靠传输",
+    "content": "《计算机网络》第3章 传输层 知识点：可靠传输。",
+    "keywords": [
+      "可靠传输"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第3章 传输层",
+    "category": "知识点",
+    "title": "拥塞控制",
+    "content": "《计算机网络》第3章 传输层 知识点：拥塞控制。",
+    "keywords": [
+      "拥塞控制"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第4章 网络层",
+    "category": "章节",
+    "title": "第4章 网络层",
+    "content": "《计算机网络》第4章 网络层 包含知识点：IP、路由、ICMP。",
+    "keywords": [
+      "计算机网络",
+      "第4章 网络层",
+      "IP",
+      "路由",
+      "ICMP"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第4章 网络层",
+    "category": "网络层",
+    "title": "IP",
+    "content": "寻址、路由与分组转发，连接传输层与链路层的关键协议。",
+    "keywords": [
+      "IP"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第4章 网络层",
+    "category": "知识点",
+    "title": "路由",
+    "content": "《计算机网络》第4章 网络层 知识点：路由。",
+    "keywords": [
+      "路由"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第4章 网络层",
+    "category": "知识点",
+    "title": "ICMP",
+    "content": "《计算机网络》第4章 网络层 知识点：ICMP。",
+    "keywords": [
+      "ICMP"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第5章 链路与安全",
+    "category": "章节",
+    "title": "第5章 链路与安全",
+    "content": "《计算机网络》第5章 链路与安全 包含知识点：MAC、ARP、TLS/SSL。",
+    "keywords": [
+      "计算机网络",
+      "第5章 链路与安全",
+      "MAC",
+      "ARP",
+      "TLS/SSL"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第5章 链路与安全",
+    "category": "知识点",
+    "title": "MAC",
+    "content": "《计算机网络》第5章 链路与安全 知识点：MAC。",
+    "keywords": [
+      "MAC"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第5章 链路与安全",
+    "category": "知识点",
+    "title": "ARP",
+    "content": "《计算机网络》第5章 链路与安全 知识点：ARP。",
+    "keywords": [
+      "ARP"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "第5章 链路与安全",
+    "category": "安全",
+    "title": "TLS/SSL",
+    "content": "HTTPS 的安全基础，掌握握手、加密与证书验证机制。",
+    "keywords": [
+      "TLS/SSL",
+      "TLS",
+      "SSL"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "",
+    "category": "课件",
+    "title": "国家智慧教育平台 · 计算机网络自学笔记",
+    "content": "国家智慧教育平台 · 计算机网络自学笔记。资源链接：https://higher.smartedu.cn/course/6781aa31b60b1822c5ff1819",
+    "keywords": [
+      "国家智慧教育平台 · 计算机网络自学笔记",
+      "课件"
+    ]
+  },
+  {
+    "course_id": "C003",
+    "course_name": "计算机网络",
+    "chapter": "",
+    "category": "课件",
+    "title": "中科大《计算机网络》自顶向下（B站）",
+    "content": "中科大《计算机网络》自顶向下（B站）。资源链接：https://www.bilibili.com/video/BV1JV411t7ow/",
+    "keywords": [
+      "中科大《计算机网络》自顶向下（B站）",
+      "课件"
+    ]
+  }
+]

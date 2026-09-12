@@ -49,7 +49,15 @@ MODEL_NAME = os.getenv(
 
 DEVICE = os.getenv(
     "DEVICE",
-    "cpu"
+    "cpu",
+).strip().lower()
+
+# 单独指定 Embedding 设备（可选）：
+# 设为 cpu 可让 bge-m3 不占用 GPU，把显存留给 Qwen 7B 4bit；
+# 未设置时仍然沿用 DEVICE，保持向后兼容。
+EMBEDDING_DEVICE = os.getenv(
+    "EMBEDDING_DEVICE",
+    "",
 ).strip().lower()
 
 
@@ -106,7 +114,10 @@ class EmbeddingModel:
 
         if device is None:
 
-            device = DEVICE
+            device = (
+                EMBEDDING_DEVICE
+                or DEVICE
+            )
 
         # 请求 cuda 但 torch 无 CUDA 支持时回退 CPU（与 qwen_model 行为一致）
         if device == "cuda" and not torch.cuda.is_available():

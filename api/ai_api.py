@@ -1,4 +1,4 @@
-"""
+﻿"""
 ProgramMind
 
 AI 统一接口服务
@@ -27,13 +27,37 @@ AI 统一接口服务
 
 
 import logging
+import threading
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse as BaseJSONResponse
 from pydantic import BaseModel
 
 
 logger = logging.getLogger(__name__)
+
+
+# ============================================================
+# 统一 JSON 响应
+#
+# FastAPI 默认返回 application/json（不带 charset）。
+# 按 RFC 8259，JSON 本身固定使用 UTF-8，浏览器 fetch/axios
+# 也会按 UTF-8 解析，因此接口数据一直是正确的 UTF-8。
+#
+# 但 Windows PowerShell 5.1 的 Invoke-RestMethod 在
+# Content-Type 未声明 charset 时，会用 Latin-1 解码响应，
+# 于是中文被显示成 ç¥è¯...。
+#
+# 这里显式声明 charset=utf-8：
+#   - 不改变响应内容与编码（仍然 UTF-8）
+#   - 让 PowerShell 5.1 等客户端正确解码中文
+#   - 保留 JSONResponse 名称，所有错误分支同样生效
+# ============================================================
+
+class JSONResponse(BaseJSONResponse):
+    """显式声明 UTF-8 的 JSON 响应。"""
+
+    media_type = "application/json; charset=utf-8"
 
 
 # ============================================================
@@ -58,7 +82,8 @@ from innovation.dynamic_plan import DynamicPlanner
 app = FastAPI(
     title="ProgramMind AI",
     description="高校学科垂类大模型智能教学科研平台",
-    version="1.0.0"
+    version="1.0.0",
+    default_response_class=JSONResponse,
 )
 
 
@@ -94,6 +119,21 @@ llm = None
 
 rag = None
 
+# ============================================================
+# 共享 RAG 检索器
+#
+# /api/rag/search 和 /api/rag 共用同一个：
+#
+# VectorRetriever
+#     ↓
+# EmbeddingModel
+#     ↓
+# bge-m3
+#
+# 避免重复加载 Embedding 模型。
+# ============================================================
+
+shared_retriever = None
 
 # ------------------------------------------------------------
 # Agent / KCI / 学习规划模块
@@ -107,6 +147,70 @@ workflow = None
 kci_model = None
 
 planner = None
+
+def _get_shared_retriever():
+    """
+    获取共享的 RAG 向量检索器。
+
+    第一次调用时初始化：
+
+        bge-m3
+            ↓
+        PGVector
+
+    后续 /api/rag/search 和 /api/rag
+    直接复用，避免重复加载 Embedding 模型。
+    """
+
+    global shared_retriever
+
+    if shared_retriever is None:
+
+        from knowledge.vector_retrieval import VectorRetriever
+
+        shared_retriever = VectorRetriever(
+            threshold=0.5
+        )
+
+    return shared_retriever
+
+
+# ============================================================
+# 共享 LLM 实例
+#
+# /api/chat 与 /api/rag 共用同一个 LLMModel：
+#
+#     第一次调用任一接口
+#         ↓
+#     创建 LLMModel（Qwen 依然是懒加载）
+#         ↓
+#     另一个接口直接复用，不再重复加载 Qwen 7B
+#
+# 用锁保护首次创建，避免并发首请求同时各建一份。
+# ============================================================
+
+llm_lock = threading.Lock()
+
+
+def _get_llm():
+    """
+    获取全局共享的 LLM 实例。
+
+    第一次调用时创建 LLMModel，
+    之后 /api/chat 与 /api/rag 复用同一实例。
+    """
+
+    global llm
+
+    if llm is None:
+
+        with llm_lock:
+
+            if llm is None:
+
+                llm = LLMModel()
+
+    return llm
 
 
 def _get_workflow():
@@ -261,8 +365,6 @@ def chat(req: ChatRequest):
     }
     """
 
-    global llm
-
     # --------------------------------------------------------
     # 参数检查
     # --------------------------------------------------------
@@ -282,11 +384,12 @@ def chat(req: ChatRequest):
 
         # ----------------------------------------------------
         # 第一次调用时初始化统一模型系统
+        #
+        # 使用全局共享实例：
+        # /api/chat 与 /api/rag 只加载一份 Qwen。
         # ----------------------------------------------------
 
-        if llm is None:
-
-            llm = LLMModel()
+        llm_instance = _get_llm()
 
         # ----------------------------------------------------
         # 按请求场景路由模型：
@@ -295,7 +398,7 @@ def chat(req: ChatRequest):
         # 代码 / 算法 / 论文 / 科研                    → DeepSeek
         # ----------------------------------------------------
 
-        answer = llm.generate(
+        answer = llm_instance.generate(
             question,
             task=task
         )
@@ -399,12 +502,19 @@ def rag_chat(req: RAGRequest):
         #
         # Qwen 本身依然采用懒加载，
         # 真正执行 rag.run() 时才加载。
+        #
+        # LLM 使用全局共享实例：
+        # /api/rag 不再单独加载一份 Qwen 7B。
+        #
+        # Retriever 同样使用共享实例：
+        # /api/rag 不再单独加载一份 BGE-M3。
         # --------------------------------------------------------
 
         if rag is None:
 
             rag = RAGPipeline(
-                load_llm=True
+                llm=_get_llm(),
+                retriever=_get_shared_retriever(),
             )
 
         # --------------------------------------------------------
@@ -603,6 +713,143 @@ def learning_plan(req: PlanRequest):
 
     return result
 
+
+# ============================================================
+# 2.1 RAG 知识片段检索（只读，不加载 Qwen）
+# ============================================================
+
+
+class RAGSearchRequest(BaseModel):
+    """
+    RAG 知识片段检索请求。
+
+    示例：
+
+    {
+        "query": "什么是数据结构？",
+        "top_k": 5
+    }
+    """
+
+    query: str
+
+    top_k: int = 5
+
+
+# 独立于 /api/rag 的检索实例：
+# 只初始化 Embedding + PGVector 检索能力，不加载 Qwen 7B。
+
+
+@app.post("/api/rag/search")
+def rag_search(req: RAGSearchRequest):
+    """
+    只读的向量检索接口：返回知识片段，不调用大模型。
+
+    流程：
+
+        用户问题
+            ↓
+        bge-m3
+            ↓
+        PGVector
+            ↓
+        相似度过滤
+            ↓
+        返回知识片段（chunks）
+
+    请求：
+
+    {
+        "query": "什么是数据结构？",
+        "top_k": 5
+    }
+
+    返回：
+
+    {
+        "query": "什么是数据结构？",
+        "top_k": 5,
+        "results": [
+            {
+                "content": "...",
+                "source": "...",
+                "score": 0.8341,
+                "chunk_id": 0,
+                "id": 128
+            }
+        ]
+    }
+    """
+
+    if not req.query or not req.query.strip():
+
+        return JSONResponse(
+            status_code=400,
+            content={"error": "query 不能为空。"}
+        )
+
+    query = req.query.strip()
+
+    # top_k 限制在 1~20，避免异常请求
+    try:
+
+        top_k = int(req.top_k)
+
+    except (TypeError, ValueError):
+
+        top_k = 5
+
+    top_k = max(1, min(top_k, 20))
+
+    try:
+
+        retriever = _get_shared_retriever()
+
+        docs = retriever.search(
+            query,
+            top_k=top_k
+        )
+
+    except Exception:
+
+        logger.exception("RAG 知识片段检索接口处理失败")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "AI 服务暂时不可用，请稍后重试"}
+        )
+
+    results = []
+
+    for doc in docs or []:
+
+        try:
+
+            score = float(
+                doc.get(
+                    "score",
+                    0.0
+                )
+            )
+
+        except (TypeError, ValueError):
+
+            score = 0.0
+
+        results.append(
+            {
+                "content": doc.get("content", ""),
+                "source": doc.get("source"),
+                "score": score,
+                "chunk_id": doc.get("chunk_id", 0),
+                "id": doc.get("id")
+            }
+        )
+
+    return {
+        "query": query,
+        "top_k": top_k,
+        "results": results
+    }
 
 # ============================================================
 # 6. 健康检查

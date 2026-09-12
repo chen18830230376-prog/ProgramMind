@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProgramMind · 面向高校计算机学科的 AI-Native 教学科研平台</title>
+
+  <!-- Tailwind CSS（Play CDN，支持运行时生成，darkMode 按 class 切换） -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#E8F3FF', 100: '#BEDAFF', 200: '#94BFFF', 300: '#6BA1FF',
+              400: '#4080FF', 500: '#165DFF', 600: '#0E42D2', 700: '#0A2DB0',
+              800: '#07238C', 900: '#051A6B'
+            },
+            ink: { 900: '#0B1220', 800: '#111A2C', 700: '#1A2540', 600: '#27324F' }
+          },
+          fontFamily: {
+            sans: ['"Inter"', '"PingFang SC"', '"Microsoft YaHei"', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Element Plus 样式 + 暗黑主题变量 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-plus@2.7.0/dist/index.css" />
+  <link rel="stylesheet" href="https://unpkg.com/element-plus@2.7.0/theme-chalk/dark/css-vars.css" />
+
+  <!-- 动画库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+  <!-- 项目自定义样式（主题变量 / 动效 / 组件细节） -->
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- 首屏加载动画（Vue 挂载后由应用接管） -->
+    <div id="boot-screen" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0B1220;z-index:9999;">
+      <div class="pm-boot">
+        <div class="pm-boot-logo">PM</div>
+        <div class="pm-boot-bar"><i></i></div>
+        <div class="pm-boot-text">ProgramMind 正在启动…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 第三方依赖（UMD 全局，按依赖顺序加载） ============ -->
+  <script src="https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/vue-router@4.3.0/dist/vue-router.global.js"></script>
+  <script src="https://unpkg.com/element-plus@2.7.0/dist/index.full.min.js"></script>
+  <script src="https://unpkg.com/@element-plus/icons-vue@2.3.1/dist/index.iife.min.js"></script>
+  <script src="https://unpkg.com/echarts@5.5.0/dist/echarts.min.js"></script>
+
+  <!-- ============ 项目脚本（顺序：基础 → 组件 → 视图 → 路由 → 启动） ============ -->
+  <script src="/assets/js/store.js"></script>
+  <script src="/assets/js/mock-ai.js"></script>
+  <script src="/assets/js/components.js"></script>
+  <script src="/assets/js/views/login.js"></script>
+  <script src="/assets/js/views/workspace.js"></script>
+  <script src="/assets/js/views/learning.js"></script>
+  <script src="/assets/js/views/teaching.js"></script>
+  <script src="/assets/js/views/ai.js"></script>
+  <script src="/assets/js/views/growth.js"></script>
+  <script src="/assets/js/views/profile.js"></script>
+  <script src="/assets/js/router.js"></script>
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

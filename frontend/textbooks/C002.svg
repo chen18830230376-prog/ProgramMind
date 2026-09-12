@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="580" viewBox="0 0 420 580" font-family="'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#36CFC9"/>
+      <stop offset="0.55" stop-color="#14A89F"/>
+      <stop offset="1" stop-color="#0B6B66"/>
+    </linearGradient>
+    <radialGradient id="glow2" cx="0.8" cy="0.15" r="0.8">
+      <stop offset="0" stop-color="#AFF6F2" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#AFF6F2" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="spine2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#000000" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="420" height="580" fill="url(#bg2)"/>
+  <rect x="0" y="0" width="22" height="580" fill="url(#spine2)"/>
+  <rect x="0" y="0" width="10" height="580" fill="#000000" opacity="0.18"/>
+  <rect x="0" y="0" width="420" height="580" fill="url(#glow2)"/>
+
+  <!-- 装饰：二叉树结构 -->
+  <g stroke="#D7FBF8" stroke-opacity="0.6" stroke-width="2">
+    <line x1="210" y1="400" x2="140" y2="450"/>
+    <line x1="210" y1="400" x2="280" y2="450"/>
+    <line x1="140" y1="450" x2="105" y2="500"/>
+    <line x1="140" y1="450" x2="175" y2="500"/>
+    <line x1="280" y1="450" x2="245" y2="500"/>
+    <line x1="280" y1="450" x2="315" y2="500"/>
+  </g>
+  <g fill="#D7FBF8">
+    <circle cx="210" cy="400" r="11" stroke="#FFFFFF" stroke-width="2"/>
+    <circle cx="140" cy="450" r="10" stroke="#FFFFFF" stroke-width="2"/>
+    <circle cx="280" cy="450" r="10" stroke="#FFFFFF" stroke-width="2"/>
+    <circle cx="105" cy="500" r="8" fill="#FFFFFF" fill-opacity="0.85"/>
+    <circle cx="175" cy="500" r="8" fill="#FFFFFF" fill-opacity="0.85"/>
+    <circle cx="245" cy="500" r="8" fill="#FFFFFF" fill-opacity="0.85"/>
+    <circle cx="315" cy="500" r="8" fill="#FFFFFF" fill-opacity="0.85"/>
+  </g>
+  <g fill="#D7FBF8" fill-opacity="0.85" font-family="monospace" font-size="18">
+    <text x="320" y="150">[ ]</text>
+    <text x="60" y="200" fill="#AFF6F2">{}</text>
+  </g>
+
+  <text x="42" y="64" fill="#E6FFFD" font-size="14" letter-spacing="1" opacity="0.92">普通高等教育 · 计算机类精品教材</text>
+  <line x1="42" y1="78" x2="300" y2="78" stroke="#E6FFFD" stroke-opacity="0.5" stroke-width="1"/>
+
+  <text x="40" y="250" fill="#FFFFFF" font-size="52" font-weight="800">数据结构</text>
+  <rect x="42" y="276" width="64" height="6" rx="3" fill="#FF7D00"/>
+  <text x="42" y="310" fill="#D7FBF8" font-size="18" font-weight="600">线性表 · 树 · 图 · 排序与查找</text>
+
+  <text x="42" y="500" fill="#E6FFFD" font-size="15" opacity="0.9">课程代码 CS201</text>
+  <text x="42" y="528" fill="#FFFFFF" font-size="16" font-weight="600">主编　张明远</text>
+  <text x="42" y="556" fill="#D7FBF8" font-size="13" opacity="0.85">ProgramMind 教育出品 · 高等教育出版社</text>
+</svg>

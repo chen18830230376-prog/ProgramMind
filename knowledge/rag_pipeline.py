@@ -35,6 +35,7 @@ Qwen
 """
 
 import logging
+import re
 
 from .vector_retrieval import VectorRetriever
 from .source_trace import SourceTracer
@@ -53,7 +54,65 @@ class RAGPipeline:
     RAG 任务通过 ModelRouter 路由到 Qwen。
     """
 
-    def __init__(self, load_llm=True):
+    # 连续重复的同一引用标记，例如：
+    #     [知识片段 3] [知识片段 3]
+    _REPEATED_CITATION = re.compile(
+        r"(\[知识片段\s*(\d+)\])(?:\s*\[知识片段\s*\2\])+"
+    )
+
+    @staticmethod
+    def _clean_answer(answer):
+        """
+        引用标记格式清理（只做格式约束，不改动知识内容）。
+
+        1. 合并连续重复的同一引用标记
+        2. 去掉结尾被截断的半个引用标记，例如 "[知识片段"
+        """
+
+        text = str(
+            answer or ""
+        ).strip()
+
+        if not text:
+
+            return text
+
+        text = RAGPipeline._REPEATED_CITATION.sub(
+            r"\1",
+            text
+        )
+
+        # 结尾存在未闭合的 "[" -> 说明引用标记被截断
+        if text.rfind("[") > text.rfind("]"):
+
+            text = text[
+                : text.rfind("[")
+            ].rstrip()
+
+        return text
+
+    def __init__(
+        self,
+        load_llm=True,
+        llm=None,
+        retriever=None
+    ):
+        """
+        参数：
+
+            load_llm:
+                True 时自行创建 LLMModel。
+
+            llm:
+                注入已有的 LLMModel 实例（依赖注入）。
+                传入时优先使用该实例，不再重复创建，
+                用于让 /api/rag 复用 /api/chat 的全局 LLM。
+
+            retriever:
+                注入已有的 VectorRetriever 实例（依赖注入）。
+                传入时直接复用，不再重复加载 BGE-M3，
+                用于让 /api/rag 复用 /api/rag/search 的共享检索器。
+        """
 
         print("=" * 60)
         print("初始化 ProgramMind RAG 系统")
@@ -61,11 +120,20 @@ class RAGPipeline:
 
         # ----------------------------------------------------
         # 向量检索器
+        #
+        # 传入 retriever 时直接复用；
+        # 未传入时保持原有行为：自行创建 VectorRetriever。
         # ----------------------------------------------------
 
-        self.retriever = VectorRetriever(
-            threshold=0.5
-        )
+        if retriever is not None:
+
+            self.retriever = retriever
+
+        else:
+
+            self.retriever = VectorRetriever(
+                threshold=0.5
+            )
 
         # ----------------------------------------------------
         # 来源追踪
@@ -79,7 +147,12 @@ class RAGPipeline:
 
         self.llm = None
 
-        if load_llm:
+        if llm is not None:
+
+            # 复用外部传入的 LLM 实例
+            self.llm = llm
+
+        elif load_llm:
 
             self.llm = LLMModel()
 
@@ -240,7 +313,8 @@ class RAGPipeline:
 
                 raise RuntimeError(
                     "LLM 尚未初始化，"
-                    "请使用 RAGPipeline(load_llm=True)"
+                    "请使用 RAGPipeline(load_llm=True) "
+                    "或通过 RAGPipeline(llm=...) 注入实例"
                 )
 
             print()
@@ -257,6 +331,11 @@ class RAGPipeline:
             answer = self.llm.generate(
                 prompt,
                 task="RAG"
+            )
+
+            # 引用标记格式清理（重复引用 / 截断的半个标记）
+            answer = self._clean_answer(
+                answer
             )
 
         # ----------------------------------------------------
